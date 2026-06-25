@@ -4,8 +4,6 @@ namespace ProfileService.Domain.Entities
 {
     public class UserProfile : BaseEntity
     {
-        public int UserId { get; set; }
-
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
@@ -18,6 +16,5 @@ namespace ProfileService.Domain.Entities
         public NotificationSettings? NotificationSettings { get; set; }
         public PrivacySettings? PrivacySettings { get; set; }
         #endregion
-
     }
 }

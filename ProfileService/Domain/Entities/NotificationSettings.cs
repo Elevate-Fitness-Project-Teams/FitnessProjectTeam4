@@ -4,8 +4,6 @@ namespace ProfileService.Domain.Entities
 {
     public class NotificationSettings : BaseEntity
     {
-        public int UserId { get; set; }
-
         public bool WorkoutReminders { get; set; } = true;
         public bool MealReminders { get; set; } = true;
         public bool AchievementAlerts { get; set; } = true;
