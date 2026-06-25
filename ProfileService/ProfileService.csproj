@@ -6,6 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>02960929-26f3-40f2-9335-20e604e1128b</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+
+	<NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,8 +30,8 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
-    <Folder Include="Features\" />
     <Folder Include="Infrastructure\MessageBroker\" />
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
 </Project>
