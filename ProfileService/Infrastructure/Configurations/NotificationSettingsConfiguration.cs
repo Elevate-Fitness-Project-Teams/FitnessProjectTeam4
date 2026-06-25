@@ -8,7 +8,7 @@ namespace ProfileService.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<NotificationSettings> builder)
         {
-            builder.HasKey(n => n.UserId);
+            builder.HasKey(n => n.Id);
 
             builder.Property(n => n.WorkoutReminders).HasDefaultValue(true);
             builder.Property(n => n.MealReminders).HasDefaultValue(true);

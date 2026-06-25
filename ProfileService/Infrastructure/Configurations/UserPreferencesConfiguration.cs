@@ -8,7 +8,7 @@ namespace ProfileService.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<UserPreferences> builder)
         {
-            builder.HasKey(p => p.UserId);
+            builder.HasKey(p => p.Id);
 
             builder.Property(p => p.Language).HasMaxLength(10).HasDefaultValue("en");
             builder.Property(p => p.Theme).HasMaxLength(15).HasDefaultValue("light");

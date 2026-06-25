@@ -8,7 +8,7 @@ namespace ProfileService.Infrastructure.Configurations
     {
         public void Configure(EntityTypeBuilder<UserProfile> builder)
         {
-            builder.HasKey(u => u.UserId);
+            builder.HasKey(u => u.Id);
 
             builder.Property(u => u.FirstName).HasMaxLength(50).IsRequired();
             builder.Property(u => u.LastName).HasMaxLength(50).IsRequired();
@@ -20,17 +20,17 @@ namespace ProfileService.Infrastructure.Configurations
 
             builder.HasOne(u => u.Preferences)
                 .WithOne()
-                .HasForeignKey<UserPreferences>(p => p.UserId)
+                .HasForeignKey<UserPreferences>(p => p.Id)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(u => u.NotificationSettings)
                 .WithOne()
-                .HasForeignKey<NotificationSettings>(n => n.UserId)
+                .HasForeignKey<NotificationSettings>(n => n.Id)
                 .OnDelete(DeleteBehavior.Cascade);
 
             builder.HasOne(u => u.PrivacySettings)
                 .WithOne()
-                .HasForeignKey<PrivacySettings>(p => p.UserId)
+                .HasForeignKey<PrivacySettings>(p => p.Id)
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }
