@@ -12,8 +12,8 @@ using ProfileService.Infrastructure.Data;
 namespace ProfileService.Migrations
 {
     [DbContext(typeof(ProfileDbContext))]
-    [Migration("20260623213857_Init")]
-    partial class Init
+    [Migration("20260625061245_AddMockSeedData")]
+    partial class AddMockSeedData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -27,21 +27,30 @@ namespace ProfileService.Migrations
 
             modelBuilder.Entity("ProfileService.Domain.Entities.NotificationSettings", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("AchievementAlerts")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("EmailNotifications")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("MealReminders")
                         .ValueGeneratedOnAdd()
@@ -53,7 +62,10 @@ namespace ProfileService.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("WeeklyReports")
@@ -66,23 +78,32 @@ namespace ProfileService.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(true);
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("NotificationSettings");
                 });
 
             modelBuilder.Entity("ProfileService.Domain.Entities.PrivacySettings", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("AllowDataSharing")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<string>("ProfileVisibility")
                         .IsRequired()
@@ -96,20 +117,26 @@ namespace ProfileService.Migrations
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("PrivacySettings");
                 });
 
             modelBuilder.Entity("ProfileService.Domain.Entities.UserPreferences", b =>
                 {
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("DistanceUnit")
@@ -126,6 +153,12 @@ namespace ProfileService.Migrations
                         .HasColumnType("nvarchar(5)")
                         .HasDefaultValue("cm");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Language")
                         .IsRequired()
                         .ValueGeneratedOnAdd()
@@ -140,7 +173,10 @@ namespace ProfileService.Migrations
                         .HasColumnType("nvarchar(15)")
                         .HasDefaultValue("light");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("WeightUnit")
@@ -150,20 +186,21 @@ namespace ProfileService.Migrations
                         .HasColumnType("nvarchar(5)")
                         .HasDefaultValue("kg");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("UserPreferences");
                 });
 
             modelBuilder.Entity("ProfileService.Domain.Entities.UserProfile", b =>
                 {
-                    b.Property<int>("UserId")
+                    b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
+                        .HasColumnType("uniqueidentifier");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedOn")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
@@ -175,6 +212,12 @@ namespace ProfileService.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsPremiumCached")
                         .HasColumnType("bit");
@@ -193,19 +236,90 @@ namespace ProfileService.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<DateTime?>("UpdatedAt")
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
                         .HasColumnType("datetime2");
 
-                    b.HasKey("UserId");
+                    b.HasKey("Id");
 
                     b.ToTable("UserProfiles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CreatedOn = new DateTime(2026, 6, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "test@developer.com",
+                            FirstName = "Hazem",
+                            IsActive = true,
+                            IsDeleted = false,
+                            IsPremiumCached = false,
+                            LastName = "Mofdi",
+                            PhoneNumber = "",
+                            ProfilePictureUrl = "https://example.com/avatar.png"
+                        });
+                });
+
+            modelBuilder.Entity("ProfileService.Domain.Entities.UserStatisticCache", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CreatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("CreatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("CurrentStreak")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastSyncedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TotalWorkouts")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(0);
+
+                    b.Property<Guid?>("UpdatedById")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedOn")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UserStatisticsCache", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
+                            CreatedOn = new DateTime(2026, 6, 25, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CurrentStreak = 5,
+                            IsActive = true,
+                            IsDeleted = false,
+                            TotalWorkouts = 25
+                        });
                 });
 
             modelBuilder.Entity("ProfileService.Domain.Entities.NotificationSettings", b =>
                 {
                     b.HasOne("ProfileService.Domain.Entities.UserProfile", null)
                         .WithOne("NotificationSettings")
-                        .HasForeignKey("ProfileService.Domain.Entities.NotificationSettings", "UserId")
+                        .HasForeignKey("ProfileService.Domain.Entities.NotificationSettings", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -214,7 +328,7 @@ namespace ProfileService.Migrations
                 {
                     b.HasOne("ProfileService.Domain.Entities.UserProfile", null)
                         .WithOne("PrivacySettings")
-                        .HasForeignKey("ProfileService.Domain.Entities.PrivacySettings", "UserId")
+                        .HasForeignKey("ProfileService.Domain.Entities.PrivacySettings", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -223,7 +337,7 @@ namespace ProfileService.Migrations
                 {
                     b.HasOne("ProfileService.Domain.Entities.UserProfile", null)
                         .WithOne("Preferences")
-                        .HasForeignKey("ProfileService.Domain.Entities.UserPreferences", "UserId")
+                        .HasForeignKey("ProfileService.Domain.Entities.UserPreferences", "Id")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ProfileService.Infrastructure.Data;
 
@@ -11,9 +12,11 @@ using ProfileService.Infrastructure.Data;
 namespace ProfileService.Migrations
 {
     [DbContext(typeof(ProfileDbContext))]
-    partial class ProfileDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260625041315_init")]
+    partial class init
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -242,21 +245,6 @@ namespace ProfileService.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserProfiles");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedOn = new DateTime(2026, 6, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "test@developer.com",
-                            FirstName = "Hazem",
-                            IsActive = true,
-                            IsDeleted = false,
-                            IsPremiumCached = false,
-                            LastName = "Mofdi",
-                            PhoneNumber = "",
-                            ProfilePictureUrl = "https://example.com/avatar.png"
-                        });
                 });
 
             modelBuilder.Entity("ProfileService.Domain.Entities.UserStatisticCache", b =>
@@ -299,17 +287,6 @@ namespace ProfileService.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("UserStatisticsCache", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("11111111-1111-1111-1111-111111111111"),
-                            CreatedOn = new DateTime(2026, 6, 25, 0, 0, 0, 0, DateTimeKind.Utc),
-                            CurrentStreak = 5,
-                            IsActive = true,
-                            IsDeleted = false,
-                            TotalWorkouts = 25
-                        });
                 });
 
             modelBuilder.Entity("ProfileService.Domain.Entities.NotificationSettings", b =>
