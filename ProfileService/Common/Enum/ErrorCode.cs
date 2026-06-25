@@ -10,5 +10,12 @@
         Unauthorized = 401,
         Forbidden = 403,
         NotFound = 404,
+
+        // Profile Specific Errors
+        ProfileNotFound = 4041,
+        StatisticsNotFound = 4042,
+
+        // Auth Errors
+        AuthTokenInvalid = 4011
     }
 }

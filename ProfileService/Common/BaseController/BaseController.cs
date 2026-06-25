@@ -4,6 +4,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using ProfileService.Common.Enum;
 using ProfileService.Common.GenericResult;
+using ProfileService.Common.Services.Interfaces;
 
 namespace ProfileService.Common.BaseEndPoint
 {
@@ -13,5 +14,9 @@ namespace ProfileService.Common.BaseEndPoint
     {
         private IMediator? _mediator;
         protected IMediator Mediator => _mediator ??= HttpContext.RequestServices.GetRequiredService<IMediator>();
+
+        private ICurrentUserService? _currentUser;
+        protected ICurrentUserService CurrentUser => _currentUser ??= HttpContext.RequestServices.GetRequiredService<ICurrentUserService>();
+
     }
 }
