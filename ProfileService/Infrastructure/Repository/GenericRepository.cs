@@ -91,5 +91,15 @@ namespace ProfileService.Infrastructure.Repository
 
             return entry;
         }
+
+        public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> criteria, CancellationToken cancellationToken)
+        {
+            return await _dbSet.AnyAsync(criteria, cancellationToken);
+        }
+
+        public async Task<TEntity?> GetByIdAsync(object id, CancellationToken cancellationToken)
+        {
+            return await _dbSet.FindAsync(new object[] { id }, cancellationToken);
+        }
     }
 }
