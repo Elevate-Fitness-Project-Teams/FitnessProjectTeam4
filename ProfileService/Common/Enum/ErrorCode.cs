@@ -16,6 +16,8 @@
         StatisticsNotFound = 4042,
 
         // Auth Errors
-        AuthTokenInvalid = 4011
+        AuthTokenInvalid = 4011,
+        AuthEmailExists = 4091
+
     }
 }
