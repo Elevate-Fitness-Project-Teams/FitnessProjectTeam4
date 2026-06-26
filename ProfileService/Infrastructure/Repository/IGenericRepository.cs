@@ -16,5 +16,8 @@ namespace ProfileService.Infrastructure.Repository
                            bool distinct = false);
         public EntityEntry<TEntity> PartialUpdate(TEntity entity, params string[] propertyNames);
         public Task<int> CountAsync(Expression<Func<TEntity, bool>> criteria, CancellationToken cancellationToken);
+
+        Task<bool> AnyAsync(Expression<Func<TEntity, bool>> criteria, CancellationToken cancellationToken);
+        Task<TEntity?> GetByIdAsync(object id, CancellationToken cancellationToken);
     }
 }
