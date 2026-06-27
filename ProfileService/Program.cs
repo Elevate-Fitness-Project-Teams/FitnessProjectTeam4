@@ -31,6 +31,7 @@ namespace ProfileService
             builder.Services.AddHttpContextAccessor();
             //builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
             builder.Services.AddScoped<ICurrentUserService, MockCurrentUserService>();
+            builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
             // AutoMapper
 
@@ -92,6 +93,7 @@ namespace ProfileService
                 app.UseSwaggerUI();
             }
 
+            app.UseStaticFiles();
             app.UseHttpsRedirection();
 
             app.UseAuthentication();
