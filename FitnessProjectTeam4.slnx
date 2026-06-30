@@ -1,3 +1,4 @@
 <Solution>
+  <Project Path="NutritionService/NutritionService.csproj" Id="0176bfdf-a834-4dff-af34-bb79e86c9f99" />
   <Project Path="ProfileService/ProfileService.csproj" Id="f3b13330-ad01-41d9-a7d6-cfb2c58cc211" />
 </Solution>
