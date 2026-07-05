@@ -3,6 +3,7 @@ using System.Reflection;
 using WorkoutService.Common.Behaviors;
 using WorkoutService.Infrastructure.Data.Contexts;
 using WorkoutService.Infrastructure.Data.Repositories;
+using MassTransit;
 
 namespace WorkoutService
 {
@@ -34,6 +35,19 @@ namespace WorkoutService
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+
+            // Register RabbitMQ
+            builder.Services.AddMassTransit(x =>
+            {
+                x.UsingRabbitMq((context, config) =>
+                {
+                    config.Host("rabbitmq://localhost", h =>
+                    {
+                        h.Username("quest");
+                        h.Password("quest");
+                    });
+                });
+            });
 
             var app = builder.Build();
 
