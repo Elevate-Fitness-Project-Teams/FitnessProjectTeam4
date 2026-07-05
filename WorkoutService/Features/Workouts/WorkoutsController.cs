@@ -97,7 +97,7 @@ namespace WorkoutService.Features.Workouts
         {
             var userId = Guid.NewGuid(); // Test
 
-            var result = await _mediator.Send(new StartWorkoutCommand(id, userId), ct);
+            var result = await _mediator.Send(new StartWorkoutSessionOrchestrator(id, userId), ct);
 
             if (!result.IsSuccess)
                 return new FailedResponseViewModel(result.Message ?? "Failed to Start Session.", new List<string>(), result.ErrorCode, DateTime.UtcNow);

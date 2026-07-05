@@ -2,9 +2,9 @@
 
 namespace WorkoutService.Features.Workouts.Commands.StartWorkout
 {
-    public class StartWorkoutCommandValidator : AbstractValidator<StartWorkoutCommand>
+    public class StartWorkoutSessionOrchestratorValidator : AbstractValidator<StartWorkoutSessionOrchestrator>
     {
-        public StartWorkoutCommandValidator()
+        public StartWorkoutSessionOrchestratorValidator()
         {
             RuleFor(x => x.WorkoutId)
                .NotEmpty()
