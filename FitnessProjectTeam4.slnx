@@ -1,4 +1,3 @@
 <Solution>
-  <Project Path="SharedMessages/SharedMessages.csproj" Id="d4e801e7-133a-49cb-a5ec-d9853958bdda" />
-  <Project Path="WorkoutService/WorkoutService.csproj" Id="a5ead925-8ec0-4624-9cc7-7f9a0b6176af" />
+  <Project Path="ProgressService/ProgressService.csproj" Id="6a9b9b89-5a22-4c46-bf54-43a3bb4289d9" />
 </Solution>
