@@ -12,6 +12,24 @@ namespace NutritionService
         public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+           
+            //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            //    .AddJwtBearer(options =>
+            //    {
+            //        options.TokenValidationParameters = new TokenValidationParameters
+            //        {
+            //            ValidateIssuer = true,       
+            //            ValidateAudience = true,      
+            //            ValidateLifetime = true,      
+            //            ValidateIssuerSigningKey = true, 
+
+            //            ValidIssuer = "YourAuthService",       
+            //            ValidAudience = "NutritionService", 
+
+                       
+            //            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("Your_Super_Secret_Key_Here_123456"))
+            //        };
+            //    });
 
             // Add services to the container.
             builder.Services.AddAuthorization();
@@ -31,7 +49,7 @@ namespace NutritionService
             builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
 
             
-            builder.Services.AddScoped<Common.Services.IFceServiceClient, Common.Services.MockFceServiceClient>();
+            
 
             var app = builder.Build();
 
@@ -53,6 +71,7 @@ namespace NutritionService
 
             app.UseHttpsRedirection();
 
+            app.UseAuthentication(); 
             app.UseAuthorization();
 
             app.MapAllEndpoints();

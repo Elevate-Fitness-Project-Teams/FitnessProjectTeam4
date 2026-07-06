@@ -10,27 +10,37 @@ namespace NutritionService.Features.MealPlans
     {
         public void MapEndpoints(IEndpointRouteBuilder app)
         {
-           
+
             app.MapGet("/api/v1/nutrition/meal-plans", async (
-                [FromQuery] int? pageIndex,
-                [FromQuery] int? pageSize,
-                IMediator mediator) =>
+                 int? pageIndex,
+                 int? pageSize,
+                 IMediator mediator,
+                 CancellationToken cancellationToken) =>
             {
                 var query = new BrowseMealPlansQuery(pageIndex ?? 1, pageSize ?? 10);
-                var result = await mediator.Send(query);
+
+                var result = await mediator.Send(query, cancellationToken);
+
                 return Results.Json(result, statusCode: result.StatusCode);
             });
 
-            
-            app.MapGet("/api/v1/nutrition/meal-plans/by-calories", async (
-                [FromQuery] int? calories,
-                IMediator mediator) =>
-            {
-                if (calories is null)
-                    throw new ArgumentException("VAL_REQUIRED_FIELD");
 
-                var query = new GetMealPlansByCaloriesQuery(calories.Value);
-                var result = await mediator.Send(query);
+
+            app.MapGet("/api/v1/nutrition/meal-plans/by-calories", async (
+                int? calories,
+                int? pageIndex,
+                int? pageSize,
+                IMediator mediator,
+                CancellationToken cancellationToken) =>
+            {
+              
+                var query = new GetMealPlansByCaloriesQuery(
+                    calories,
+                    pageIndex ?? 1,
+                    pageSize ?? 10);
+
+                var result = await mediator.Send(query, cancellationToken);
+
                 return Results.Json(result, statusCode: result.StatusCode);
             });
         }

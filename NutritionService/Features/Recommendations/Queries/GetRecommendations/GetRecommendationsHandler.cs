@@ -1,82 +1,104 @@
 using MediatR;
+using Microsoft.AspNetCore.Http; 
+using Microsoft.EntityFrameworkCore;
 using NutritionService.Common;
-using NutritionService.Common.Services;
+using NutritionService.Common.Clients;
 using NutritionService.Domain.Entities;
-using NutritionService.Domain.Enums;
 using NutritionService.Features.Recommendations.DTOs;
 using NutritionService.Persistence.Repositories;
+
+using System;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace NutritionService.Features.Recommendations.Queries.GetRecommendations
 {
     public class GetRecommendationsHandler
-        : IRequestHandler<GetRecommendationsQuery, ApiResponse<RecommendationResponseDto>>
+        : IRequestHandler<GetRecommendationsQuery, Result<RecommendationResponseDto>>
     {
         private readonly IRepository<Meal> _mealRepository;
-        private readonly IFceServiceClient _fceClient;
+        private readonly FceClient _fceClient;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public GetRecommendationsHandler(
             IRepository<Meal> mealRepository,
-            IFceServiceClient fceClient)
+            FceClient fceClient,
+            IHttpContextAccessor httpContextAccessor)
         {
             _mealRepository = mealRepository;
             _fceClient = fceClient;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public async Task<ApiResponse<RecommendationResponseDto>> Handle(
+        public async Task<Result<RecommendationResponseDto>> Handle(
             GetRecommendationsQuery request,
             CancellationToken cancellationToken)
         {
-          
-            var calorieTarget = await _fceClient.GetCalorieTargetAsync(request.UserId);
-
            
-            if (calorieTarget is null)
+            var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userIdClaim))
             {
-                return ApiResponse<RecommendationResponseDto>.Fail("FCE_METRICS_NOT_CALCULATED", 400);
+                
+                return Result<RecommendationResponseDto>.Failure(NutritionErrors.RequiredField, statusCode: 401);
             }
-
-           
-            var query = _mealRepository.Query().AsQueryable();
-
-           
-            if (!string.IsNullOrEmpty(request.MealType) 
-                && Enum.TryParse<MealType>(request.MealType, true, out var mealType))
-            {
-                query = query.Where(m => m.Type == mealType);
-            }
-
-            var effectiveMaxCalories = request.MaxCalories ?? calorieTarget.Value;
-            query = query.Where(m => m.NutritionFacts.Calories <= effectiveMaxCalories);
+            var userId = Guid.Parse(userIdClaim);
 
             
-            if (request.MinProtein.HasValue)
+            var fceMetrics = await _fceClient.GetUserMetricsAsync(userId, cancellationToken);
+
+            if (fceMetrics == null || !fceMetrics.IsCalculated)
             {
-                query = query.Where(m => m.NutritionFacts.Protein >= request.MinProtein.Value);
+                return Result<RecommendationResponseDto>.Failure(
+                    NutritionErrors.FceMetricsNotCalculated,
+                    statusCode: 400);
+            }
+
+            int userDailyGoalCalories = fceMetrics.CalorieTarget;
+
+            
+            var query = _mealRepository.Query();
+
+            
+            if (!string.IsNullOrEmpty(request.MealType) && Enum.TryParse<NutritionService.Domain.Enums.MealType>(request.MealType, true, out var mealTypeEnum))
+            {
+                query = query.Where(m => m.Type == mealTypeEnum);
+            }
+
+          
+            if (request.MaxCalories.HasValue)
+            {
+                query = query.Where(m => m.NutritionFacts != null && m.NutritionFacts.Calories <= request.MaxCalories.Value);
             }
 
            
-            var projectedQuery = query.Select(m => new RecommendedMealDto
+            if (request.MinProtein.HasValue)
+            {
+                query = query.Where(m => m.NutritionFacts != null && m.NutritionFacts.Protein >= request.MinProtein.Value);
+            }
+
+           
+            var mealsQuery = query.Select(m => new RecommendedMealDto
             {
                 MealId = m.MealId,
                 Name = m.Name,
-                Type = m.Type.ToString(),
-                Calories = m.NutritionFacts.Calories,
-                Protein = m.NutritionFacts.Protein,
-                Carbs = m.NutritionFacts.Carbs,
-                Fats = m.NutritionFacts.Fats,
-                ImageUrl = m.ImageUrl
+                MealType = m.Type.ToString(),
+                Calories = m.NutritionFacts != null ? m.NutritionFacts.Calories : 0,
+                ImageUrl = m.ImageUrl ?? string.Empty,
+                Protein = m.NutritionFacts != null ? m.NutritionFacts.Protein : 0f
             });
 
-            var pagedResult = await projectedQuery.ToPagedResultAsync(request.PageIndex, request.PageSize);
+            var pagedMeals = await mealsQuery.ToPagedResultAsync(request.Page, request.PageSize, cancellationToken);
 
            
-            var response = new RecommendationResponseDto
+            var responseDto = new RecommendationResponseDto
             {
-                UserDailyGoalCalories = calorieTarget.Value,
-                RecommendedMeals = pagedResult
+                UserDailyGoalCalories = userDailyGoalCalories,
+                RecommendedMeals = pagedMeals.Items.ToList()
             };
 
-            return ApiResponse<RecommendationResponseDto>.Success(response);
+            return Result<RecommendationResponseDto>.Success(responseDto);
         }
     }
 }
