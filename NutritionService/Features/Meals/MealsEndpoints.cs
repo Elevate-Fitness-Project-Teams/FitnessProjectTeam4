@@ -14,7 +14,7 @@ namespace NutritionService.Features.Meals
                 var result = await mediator.Send(new GetMealDetailQuery(id), cancellationToken);
 
                 return Results.Json(result, statusCode: result.StatusCode);
-            });
+            }).RequireAuthorization();
         }
     }
 }

@@ -1,17 +1,12 @@
 using MediatR;
-using Microsoft.AspNetCore.Http; 
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using NutritionService.Common;
 using NutritionService.Common.Clients;
 using NutritionService.Domain.Entities;
 using NutritionService.Features.Recommendations.DTOs;
+using NutritionService.Features.Recommendations.Extensions;
 using NutritionService.Persistence.Repositories;
-
-using System;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace NutritionService.Features.Recommendations.Queries.GetRecommendations
 {
@@ -36,16 +31,17 @@ namespace NutritionService.Features.Recommendations.Queries.GetRecommendations
             GetRecommendationsQuery request,
             CancellationToken cancellationToken)
         {
-           
-            var userIdClaim = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var userIdClaim = _httpContextAccessor.HttpContext?.User
+                .FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
             if (string.IsNullOrEmpty(userIdClaim))
             {
-                
-                return Result<RecommendationResponseDto>.Failure(NutritionErrors.RequiredField, statusCode: 401);
+                return Result<RecommendationResponseDto>.Failure(
+                    NutritionErrors.UnauthorizedUser, statusCode: 401);
             }
+
             var userId = Guid.Parse(userIdClaim);
 
-            
             var fceMetrics = await _fceClient.GetUserMetricsAsync(userId, cancellationToken);
 
             if (fceMetrics == null || !fceMetrics.IsCalculated)
@@ -57,41 +53,11 @@ namespace NutritionService.Features.Recommendations.Queries.GetRecommendations
 
             int userDailyGoalCalories = fceMetrics.CalorieTarget;
 
-            
-            var query = _mealRepository.Query();
-
-            
-            if (!string.IsNullOrEmpty(request.MealType) && Enum.TryParse<NutritionService.Domain.Enums.MealType>(request.MealType, true, out var mealTypeEnum))
-            {
-                query = query.Where(m => m.Type == mealTypeEnum);
-            }
-
-          
-            if (request.MaxCalories.HasValue)
-            {
-                query = query.Where(m => m.NutritionFacts != null && m.NutritionFacts.Calories <= request.MaxCalories.Value);
-            }
-
-           
-            if (request.MinProtein.HasValue)
-            {
-                query = query.Where(m => m.NutritionFacts != null && m.NutritionFacts.Protein >= request.MinProtein.Value);
-            }
-
-           
-            var mealsQuery = query.Select(m => new RecommendedMealDto
-            {
-                MealId = m.MealId,
-                Name = m.Name,
-                MealType = m.Type.ToString(),
-                Calories = m.NutritionFacts != null ? m.NutritionFacts.Calories : 0,
-                ImageUrl = m.ImageUrl ?? string.Empty,
-                Protein = m.NutritionFacts != null ? m.NutritionFacts.Protein : 0f
-            });
+            var mealsQuery = _mealRepository.Query()
+                .ApplyRecommendationsFilter(request.MealType, request.MaxCalories, request.MinProtein);
 
             var pagedMeals = await mealsQuery.ToPagedResultAsync(request.Page, request.PageSize, cancellationToken);
 
-           
             var responseDto = new RecommendationResponseDto
             {
                 UserDailyGoalCalories = userDailyGoalCalories,

@@ -22,7 +22,7 @@ namespace NutritionService.Features.MealPlans
                 var result = await mediator.Send(query, cancellationToken);
 
                 return Results.Json(result, statusCode: result.StatusCode);
-            });
+            }).RequireAuthorization();
 
 
 
@@ -42,7 +42,7 @@ namespace NutritionService.Features.MealPlans
                 var result = await mediator.Send(query, cancellationToken);
 
                 return Results.Json(result, statusCode: result.StatusCode);
-            });
+            }).RequireAuthorization();
         }
     }
 }

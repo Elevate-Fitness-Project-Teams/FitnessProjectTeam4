@@ -1,38 +1,33 @@
-﻿using NutritionService.Features.Recommendations.DTOs;
-using System.Net;
+using MassTransit;
+using NutritionSharedMessages.Messages;
 
 namespace NutritionService.Common.Clients
 {
     public class FceClient
     {
-        private readonly HttpClient _httpClient;
-        public FceClient(HttpClient httpClient)
+        private readonly IRequestClient<GetUserCalorieTargetRequest> _requestClient;
+
+        public FceClient(IRequestClient<GetUserCalorieTargetRequest> requestClient)
         {
-            _httpClient = httpClient;
+            _requestClient = requestClient;
         }
-        public async Task<FceUserMetricsResponse?> GetUserMetricsAsync(Guid userId, CancellationToken cancellationToken)
+
+        public async Task<GetUserCalorieTargetResponse?> GetUserMetricsAsync(Guid userId, CancellationToken cancellationToken)
         {
             try
             {
-               
-                var response = await _httpClient.GetAsync($"api/v1/metrics/user-target?userId={userId}", cancellationToken);
+                var response = await _requestClient.GetResponse<GetUserCalorieTargetResponse>(
+                    new GetUserCalorieTargetRequest { UserId = userId },
+                    cancellationToken);
 
-                
-                if (!response.IsSuccessStatusCode)
-                {
-                    if (response.StatusCode == HttpStatusCode.NotFound)
-                        return new FceUserMetricsResponse { IsCalculated = false };
-
-                    return null;
-                }
-
-               
-                var result = await response.Content.ReadFromJsonAsync<FceUserMetricsResponse>(cancellationToken: cancellationToken);
-                return result;
+                return response.Message;
+            }
+            catch (RequestTimeoutException)
+            {
+                return null;
             }
             catch (Exception)
             {
-                
                 return null;
             }
         }

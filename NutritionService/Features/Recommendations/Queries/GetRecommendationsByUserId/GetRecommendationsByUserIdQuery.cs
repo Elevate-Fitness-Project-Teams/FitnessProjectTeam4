@@ -11,5 +11,5 @@ namespace NutritionService.Features.Recommendations.Queries.GetRecommendationsBy
         float? MinProtein,
         int PageIndex,
         int PageSize
-    ) : IRequest<ApiResponse<RecommendationResponseDto>>;
+    ) : IRequest<Result<RecommendationResponseDto>>;
 }
