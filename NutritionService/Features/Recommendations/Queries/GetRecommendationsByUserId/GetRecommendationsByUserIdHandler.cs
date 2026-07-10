@@ -1,81 +1,54 @@
 using MediatR;
 using NutritionService.Common;
-using NutritionService.Common.Services;
+using NutritionService.Common.Clients;
 using NutritionService.Domain.Entities;
-using NutritionService.Domain.Enums;
 using NutritionService.Features.Recommendations.DTOs;
+using NutritionService.Features.Recommendations.Extensions;
 using NutritionService.Persistence.Repositories;
 
 namespace NutritionService.Features.Recommendations.Queries.GetRecommendationsByUserId
 {
     public class GetRecommendationsByUserIdHandler
-        : IRequestHandler<GetRecommendationsByUserIdQuery, ApiResponse<RecommendationResponseDto>>
+        : IRequestHandler<GetRecommendationsByUserIdQuery, Result<RecommendationResponseDto>>
     {
         private readonly IRepository<Meal> _mealRepository;
-        private readonly IFceServiceClient _fceClient;
+        private readonly FceClient _fceClient;
 
         public GetRecommendationsByUserIdHandler(
             IRepository<Meal> mealRepository,
-            IFceServiceClient fceClient)
+            FceClient fceClient)
         {
             _mealRepository = mealRepository;
             _fceClient = fceClient;
         }
 
-        public async Task<ApiResponse<RecommendationResponseDto>> Handle(
+        public async Task<Result<RecommendationResponseDto>> Handle(
             GetRecommendationsByUserIdQuery request,
             CancellationToken cancellationToken)
         {
-           
-            var calorieTarget = await _fceClient.GetCalorieTargetAsync(request.UserId);
+            var fceMetrics = await _fceClient.GetUserMetricsAsync(request.UserId, cancellationToken);
 
-           
-            if (calorieTarget is null)
+            if (fceMetrics == null || !fceMetrics.IsCalculated)
             {
-                return ApiResponse<RecommendationResponseDto>.Fail("FCE_METRICS_NOT_CALCULATED", 400);
+                return Result<RecommendationResponseDto>.Failure(
+                    NutritionErrors.FceMetricsNotCalculated,
+                    statusCode: 400);
             }
 
-          
-            var query = _mealRepository.Query().AsQueryable();
+            int userDailyGoalCalories = fceMetrics.CalorieTarget;
 
-            if (!string.IsNullOrEmpty(request.MealType)
-                && Enum.TryParse<MealType>(request.MealType, true, out var mealType))
+            var mealsQuery = _mealRepository.Query()
+                .ApplyRecommendationsFilter(request.MealType, request.MaxCalories, request.MinProtein);
+
+            var pagedMeals = await mealsQuery.ToPagedResultAsync(request.PageIndex, request.PageSize, cancellationToken);
+
+            var responseDto = new RecommendationResponseDto
             {
-                query = query.Where(m => m.Type == mealType);
-            }
-
-           
-            var effectiveMaxCalories = request.MaxCalories ?? calorieTarget.Value;
-            query = query.Where(m => m.NutritionFacts.Calories <= effectiveMaxCalories);
-
-            if (request.MinProtein.HasValue)
-            {
-                query = query.Where(m => m.NutritionFacts.Protein >= request.MinProtein.Value);
-            }
-
-            
-            var projectedQuery = query.Select(m => new RecommendedMealDto
-            {
-                MealId = m.MealId,
-                Name = m.Name,
-                Type = m.Type.ToString(),
-                Calories = m.NutritionFacts.Calories,
-                Protein = m.NutritionFacts.Protein,
-                Carbs = m.NutritionFacts.Carbs,
-                Fats = m.NutritionFacts.Fats,
-                ImageUrl = m.ImageUrl
-            });
-
-            var pagedResult = await projectedQuery.ToPagedResultAsync(request.PageIndex, request.PageSize);
-
-           
-            var response = new RecommendationResponseDto
-            {
-                UserDailyGoalCalories = calorieTarget.Value,
-                RecommendedMeals = pagedResult
+                UserDailyGoalCalories = userDailyGoalCalories,
+                RecommendedMeals = pagedMeals.Items.ToList()
             };
 
-            return ApiResponse<RecommendationResponseDto>.Success(response);
+            return Result<RecommendationResponseDto>.Success(responseDto);
         }
     }
 }

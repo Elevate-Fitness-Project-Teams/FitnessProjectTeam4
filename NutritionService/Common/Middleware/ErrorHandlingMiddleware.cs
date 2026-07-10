@@ -17,38 +17,42 @@ namespace NutritionService.Common.Middleware
         {
             try
             {
+                
                 await _next(context);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Unhandled exception: {Message}", ex.Message);
+               
+                _logger.LogError(ex, "An unhandled exception occurred: {Message}", ex.Message);
+
+                
                 await HandleExceptionAsync(context, ex);
             }
         }
 
         private static async Task HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            var (statusCode, message) = exception switch
+           
+            if (context.Response.HasStarted)
             {
-                KeyNotFoundException ex => (StatusCodes.Status404NotFound, ex.Message),
-                ArgumentException ex => (StatusCodes.Status400BadRequest, ex.Message),
-                UnauthorizedAccessException ex => (StatusCodes.Status401Unauthorized, ex.Message),
-                _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred.")
-            };
+                return;
+            }
 
-            var response = ApiResponse.Fail(message, statusCode);
-
-            context.Response.StatusCode = statusCode;
+           
+            context.Response.Clear();
             context.Response.ContentType = "application/json";
 
-            var jsonOptions = new JsonSerializerOptions
-            {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-            };
+            
+            var statusCode = StatusCodes.Status500InternalServerError;
+            var errorCode = "INTERNAL_SERVER_ERROR";
 
-            await context.Response.WriteAsync(
-                JsonSerializer.Serialize(response, jsonOptions)
-            );
+            context.Response.StatusCode = statusCode;
+
+            
+            var response = Result<object>.Failure(errorCode, statusCode);
+
+            
+            await context.Response.WriteAsJsonAsync(response);
         }
     }
 }

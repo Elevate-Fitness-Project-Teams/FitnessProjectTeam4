@@ -5,11 +5,9 @@ using NutritionService.Features.Recommendations.DTOs;
 namespace NutritionService.Features.Recommendations.Queries.GetRecommendations
 {
     public record GetRecommendationsQuery(
-        Guid UserId,
-        string? MealType,
-        int? MaxCalories,
-        float? MinProtein,
-        int PageIndex,
-        int PageSize
-    ) : IRequest<ApiResponse<RecommendationResponseDto>>;
+         string? MealType,
+         int Page,
+         int PageSize,
+         int? MaxCalories,
+         float? MinProtein) : IRequest<Result<RecommendationResponseDto>>;
 }
