@@ -20,26 +20,6 @@ namespace WorkoutService.Infrastructure.Data.Configurations
                    .HasForeignKey(ws => ws.WorkoutId)
                    .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasIndex(ws => ws.Status)
-                  .HasDatabaseName("IX_WorkoutSessions_Status");
-
-            builder.HasIndex(ws => ws.WorkoutId)
-                   .HasDatabaseName("IX_WorkoutSessions_Workout");
-
-            builder.HasIndex(ws => new
-            {
-                ws.UserId,
-                ws.StartTime
-            }).HasDatabaseName("IX_WorkoutSessions_History");
-
-            builder.HasIndex(ws => new
-            {
-                ws.UserId,
-                ws.Status
-            }).HasDatabaseName("IX_WorkoutSessions_User_Status");
-
-           
-
         }
     }
 }

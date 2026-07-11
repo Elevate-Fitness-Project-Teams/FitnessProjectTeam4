@@ -2,20 +2,28 @@
 {
     public class SuccessResponseViewModel<T> : ResponseViewModel
     {
-        public T Data { get; set; }
-        public SuccessResponseViewModel(T data, string message, List<string> errors, int statusCode, DateTime timestamp)
+        public T Data { get; init; }
+
+        public SuccessResponseViewModel(T data, string message, DateTime timestamp)
         {
             IsSuccess = true;
-            Message = message;
+
             Data = data;
-            Errors = errors;
-            StatusCode = statusCode;
+
+            Message = message;
+
             Timestamp = timestamp;
         }
+
         public SuccessResponseViewModel(T data)
         {
             IsSuccess = true;
+
             Data = data;
+
+            Message = "Operation completed successfully.";
+
+            Timestamp = DateTime.UtcNow;
         }
     }
 }

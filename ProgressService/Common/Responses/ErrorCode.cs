@@ -32,26 +32,6 @@ namespace ProgressService.Common.Responses
         ConcurrencyConflict = 107,
 
 
-        // Workout Sessions
-        [Description("The requested workout session was not found.")]
-        WorkoutSessionNotFound = 200,
-
-        [Description("The workout session has already started.")]
-        WorkoutSessionAlreadyStarted = 201,
-
-        [Description("The workout session has already been completed.")]
-        WorkoutSessionAlreadyCompleted = 202,
-
-        [Description("The workout session has been abandoned.")]
-        WorkoutSessionAbandoned = 203,
-
-        [Description("The workout session is not active.")]
-        WorkoutSessionNotActive = 204,
-
-        [Description("The workout session cannot be modified.")]
-        WorkoutSessionModificationNotAllowed = 205,
-
-
         // Workout Progress 
         [Description("Workout progress was not found.")]
         ProgressNotFound = 300,
@@ -116,7 +96,7 @@ namespace ProgressService.Common.Responses
         [Description("A weight entry for the specified date already exists.")]
         WeightEntryAlreadyExists = 601,
 
-        [Description("The provided weight value is invalid.")]
+        [Description("Weight must be between 40 and 200 kg.")]
         InvalidWeightValue = 602,
 
         [Description("Weight history cannot be deleted.")]

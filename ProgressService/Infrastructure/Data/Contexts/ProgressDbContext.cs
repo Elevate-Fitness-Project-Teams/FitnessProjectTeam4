@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MassTransit;
+using Microsoft.EntityFrameworkCore;
 using ProgressService.Domian.Aggregates.UserStatistics;
 using ProgressService.Domian.Aggregates.UserStreaks;
 using ProgressService.Domian.Aggregates.WorkoutLogs;
@@ -28,6 +29,9 @@ namespace ProgressService.Infrastructure.Data.Contexts
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.AddOutboxMessageEntity();
+            modelBuilder.AddOutboxStateEntity();
+            modelBuilder.AddInboxStateEntity();
 
             modelBuilder.ApplyConfigurationsFromAssembly(typeof(ProgressDbContext).Assembly);
         }

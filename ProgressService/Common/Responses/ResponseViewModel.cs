@@ -1,12 +1,13 @@
 ﻿namespace ProgressService.Common.Responses
 {
-    public class ResponseViewModel
+    public abstract class ResponseViewModel
     {
-        public bool IsSuccess { get; set; }
-        public string? Message { get; set; }
-        public List<string> Errors { get; set; } = new();
-        public int StatusCode { get; set; }
-        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public bool IsSuccess { get; init; }
 
+        public string Message { get; init; } = default!;
+
+        public List<string>? Errors { get; init; }
+
+        public DateTime Timestamp { get; init; }
     }
 }

@@ -22,9 +22,9 @@ namespace WorkoutService.Features.WorkoutPlans
             var result = await _mediator.Send(command, ct);
 
             if (!result.IsSuccess)
-                return new FailedResponseViewModel( result.Message ?? "Failed to create workout plan.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
 
-            return new SuccessResponseViewModel<Guid>(result.Data!, "Workout plan created successfully.", new List<string>(), 201, DateTime.UtcNow);
+            return new SuccessResponseViewModel<Guid>(result.Data!, "Workout plan created successfully.", DateTime.UtcNow);
         }
 
         [HttpGet]
@@ -36,7 +36,7 @@ namespace WorkoutService.Features.WorkoutPlans
             var result = await _mediator.Send(new GetWorkoutPlansQuery(userTier, pageNumber, pageSize), ct);
 
             if (!result.IsSuccess)
-                 return new FailedResponseViewModel(result.Message ?? "Failed to fetch workout plans.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                 return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
             var data = _mapper.Map<List<WorkoutPlanViewModel>>(result.Data!.Items);
 
             var paginatedList = new PaginatedList<WorkoutPlanViewModel>
@@ -47,7 +47,7 @@ namespace WorkoutService.Features.WorkoutPlans
                    pageSize
                 );
 
-            return new SuccessResponseViewModel<PaginatedList<WorkoutPlanViewModel>>(paginatedList, "Workout plans fetched successfully.", new List<string>(), 200, DateTime.UtcNow);
+            return new SuccessResponseViewModel<PaginatedList<WorkoutPlanViewModel>>(paginatedList, "Workout plans fetched successfully.", DateTime.UtcNow);
         }
 
         [HttpGet("{planId}")]
@@ -56,10 +56,10 @@ namespace WorkoutService.Features.WorkoutPlans
             var result = await _mediator.Send(new GetWorkoutPlanByIdQuery(planId), ct);
 
             if (!result.IsSuccess)
-                return new FailedResponseViewModel(result.Message ?? "Failed to fetch workout plans.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
 
             var data = _mapper.Map<WorkoutPlanViewModel>(result.Data);
-            return new SuccessResponseViewModel<WorkoutPlanViewModel>(data, "Workout plan fetched successfully.", new List<string>(), 200, DateTime.UtcNow);
+            return new SuccessResponseViewModel<WorkoutPlanViewModel>(data, "Workout plan fetched successfully.", DateTime.UtcNow);
         }
     }
 }

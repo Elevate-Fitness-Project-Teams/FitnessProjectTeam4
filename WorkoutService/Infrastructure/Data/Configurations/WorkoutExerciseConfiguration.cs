@@ -24,24 +24,6 @@ namespace WorkoutService.Infrastructure.Data.Configurations
                    .WithMany()
                    .HasForeignKey(we => we.ExerciseId)
                    .OnDelete(DeleteBehavior.Restrict);
-
-            builder.HasIndex(we => we.ExerciseId)
-                   .HasDatabaseName("IX_WorkoutExercises_ExerciseId");
-
-            builder.HasIndex(we => we.WorkoutId)
-                   .HasDatabaseName("IX_WorkoutExercises_WorkoutId");
-
-            builder.HasIndex(we => new
-            {
-                we.WorkoutId,
-                we.OrderIndex
-            }).IsUnique();
-
-            builder.HasIndex(we => new
-            {
-                we.WorkoutId,
-                we.OrderIndex
-            }).HasDatabaseName("IX_WorkoutExercises_Order");
         }
     }
 }

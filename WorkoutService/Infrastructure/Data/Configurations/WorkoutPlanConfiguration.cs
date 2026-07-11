@@ -23,20 +23,6 @@ namespace WorkoutService.Infrastructure.Data.Configurations
              
             builder.HasQueryFilter(wp => !wp.IsDeleted);
 
-            builder.HasIndex(wp => wp.ExternalPlanId)
-                   .IsUnique()
-                   .HasDatabaseName("IX_WorkoutPlans_ExternalPlanId");
-
-            builder.HasIndex(wp => wp.Goal)
-                   .HasDatabaseName("IX_WorkoutPlans_Goal");
-
-            builder.HasIndex(wp => wp.Status)
-                   .HasDatabaseName("IX_WorkoutPlans_Status");
-
-            builder.HasIndex(wp => wp.Difficulty)
-                   .HasDatabaseName("IX_WorkoutPlans_Difficulty");
-
-
         }
     }
 }
