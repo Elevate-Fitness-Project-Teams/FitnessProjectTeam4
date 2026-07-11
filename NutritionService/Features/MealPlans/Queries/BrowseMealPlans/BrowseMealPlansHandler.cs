@@ -6,18 +6,18 @@ using NutritionService.Persistence.Repositories;
 
 namespace NutritionService.Features.MealPlans.Queries.BrowseMealPlans
 {
-    public class BrowseMealPlansHandler : IRequestHandler<BrowseMealPlansQuery, ApiResponse<PagedResult<BrowseMealPlanDto>>>
+    public class BrowseMealPlansHandler : IRequestHandler<BrowseMealPlansQuery, Result<PagedResult<BrowseMealPlanDto>>>
     {
         private readonly IRepository<MealPlan> _mealPlanRepository;
         public BrowseMealPlansHandler(IRepository<MealPlan> mealPlanRepository)
         {
             _mealPlanRepository = mealPlanRepository;
         }
-        public async Task<ApiResponse<PagedResult<BrowseMealPlanDto>>> Handle(
-            BrowseMealPlansQuery request,
-            CancellationToken cancellationToken)
+        public async Task<Result<PagedResult<BrowseMealPlanDto>>> Handle(BrowseMealPlansQuery request, CancellationToken cancellationToken)
         {
             var query = _mealPlanRepository.Query()
+               
+                .OrderByDescending(mp => mp.CreatedAt)
                 .Select(mp => new BrowseMealPlanDto
                 {
                     MealPlanId = mp.MealPlanId,
@@ -25,19 +25,21 @@ namespace NutritionService.Features.MealPlans.Queries.BrowseMealPlans
                     Description = mp.Description,
                     TargetCalorieRangeMin = mp.TargetCalorieRangeMin,
                     TargetCalorieRangeMax = mp.TargetCalorieRangeMax,
-                    Items = mp.MealPlanItems.Select(mpi => new MealPlanItemDto
+
+                    
+                    Items = mp.MealPlanItems.Select(item => new MealPlanItemDto
                     {
-                        Id = mpi.Id,
-                        MealId = mpi.MealId,
-                        MealName = mpi.Meal.Name, 
-                        DayOfWeek = mpi.DayOfWeek.ToString(),
-                        MealTime = mpi.MealTime.ToString()
+                        Id = item.Id,
+                        MealId = item.MealId,
+                        MealName = item.Meal.Name,
+                        DayOfWeek = item.DayOfWeek.ToString(),
+                        MealTime = item.MealTime.ToString()
                     }).ToList()
                 });
-           
-            var pagedPlans = await query.ToPagedResultAsync(request.PageIndex, request.PageSize);
-            
-            return ApiResponse<PagedResult<BrowseMealPlanDto>>.Success(pagedPlans);
+
+            var pagedResult = await query.ToPagedResultAsync(request.PageIndex, request.PageSize, cancellationToken);
+
+            return Result<PagedResult<BrowseMealPlanDto>>.Success(pagedResult);
         }
     }
 }
