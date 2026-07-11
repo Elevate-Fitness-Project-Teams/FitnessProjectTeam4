@@ -6,7 +6,7 @@ namespace WorkoutService.Common.Responses
     {
         None = 0,
 
-        // --- General ---
+        // General 
         [Description("An unexpected error occurred.")]
         UnhandledException = 100,
 
@@ -32,7 +32,7 @@ namespace WorkoutService.Common.Responses
         ConcurrencyConflict = 107,
 
 
-        // --- Workouts ---
+        // Workouts 
         [Description("The requested workout was not found.")]
         WorkoutNotFound = 200,
 
@@ -52,7 +52,7 @@ namespace WorkoutService.Common.Responses
         InvalidWorkoutDifficulty = 205,
 
 
-        // --- Workout Plans ---
+        // Workout Plans 
         [Description("The requested workout plan was not found.")]
         WorkoutPlanNotFound = 300,
 
@@ -69,7 +69,7 @@ namespace WorkoutService.Common.Responses
         WorkoutPlanAlreadyAssigned = 304,
 
 
-        // --- Exercises ---
+        // Exercises 
         [Description("The requested exercise was not found.")]
         ExerciseNotFound = 400,
 
@@ -85,8 +85,20 @@ namespace WorkoutService.Common.Responses
         [Description("Invalid exercise configuration.")]
         InvalidExerciseConfiguration = 404,
 
+        [Description("Exercise sets must be greater than zero.")]
+        InvalidExerciseSets = 405,
 
-        // --- Categories / Muscle Groups ---
+        [Description("Exercise repetitions are invalid.")]
+        InvalidExerciseReps = 406,
+
+        [Description("Exercise rest time cannot be negative.")]
+        InvalidExerciseRestTime = 407,
+
+        [Description("Exercise weight is invalid.")]
+        InvalidExerciseWeight = 408,
+
+
+        // Categories / Muscle Groups 
         [Description("The requested category was not found.")]
         CategoryNotFound = 500,
 
@@ -100,21 +112,24 @@ namespace WorkoutService.Common.Responses
         MuscleGroupNotFound = 503,
 
 
-        // --- User Progress ---
-        [Description("Workout progress was not found.")]
-        ProgressNotFound = 600,
+        // Workout Sessions
+        [Description("The requested workout session was not found.")]
+        WorkoutSessionNotFound = 600,
 
-        [Description("Workout has already been completed.")]
-        WorkoutAlreadyCompleted = 601,
+        [Description("The workout session has already started.")]
+        WorkoutSessionAlreadyStarted = 601,
 
-        [Description("Workout session has not started.")]
-        WorkoutNotStarted = 602,
+        [Description("The workout session has already been completed.")]
+        WorkoutSessionAlreadyCompleted = 602,
 
-        [Description("Workout session is already active.")]
-        WorkoutAlreadyStarted = 603,
+        [Description("The workout session has been abandoned.")]
+        WorkoutSessionAbandoned = 603,
 
-        [Description("Workout session not found.")]
-        WorkoutSessionNotFound = 604,
+        [Description("The workout session is not active.")]
+        WorkoutSessionNotActive = 604,
+
+        [Description("The workout session cannot be modified.")]
+        WorkoutSessionModificationNotAllowed = 605,
 
     }
 }

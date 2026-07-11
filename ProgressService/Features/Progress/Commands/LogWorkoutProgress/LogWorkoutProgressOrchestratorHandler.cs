@@ -11,6 +11,8 @@ using ProgressService.Features.Progress.Common.Queries.GetStreakByUserId;
 using ProgressService.Features.Progress.Common.Queries.GetUserStatistics;
 using ProgressService.Features.Progress.Dtos;
 using ProgressService.Infrastructure.Data.Repositories;
+using SharedMessages.Messages;
+using SharedMessages.Queues;
 
 namespace ProgressService.Features.Progress.Commands.LogWorkoutProgress
 {
@@ -30,7 +32,7 @@ namespace ProgressService.Features.Progress.Commands.LogWorkoutProgress
             if (!sessionExists)
             {
                 _logger.LogWarning("Workout session {SessionId} does not exist for user {UserId}.", request.SessionId, request.UserId);
-                return RequestResult<LogWorkoutProgressResponseDto>.Failure(ErrorCode.WorkoutSessionNotFound, "Workout session does not exist.");
+                return RequestResult<LogWorkoutProgressResponseDto>.Failure(ErrorCode.ProgressCannotBeLogged, "Workout session does not exist.");
             }
 
             _logger.LogInformation("Ingesting workout performance metrics for session {SessionId} by user {UserId}", request.SessionId, request.UserId);
@@ -41,7 +43,7 @@ namespace ProgressService.Features.Progress.Commands.LogWorkoutProgress
             if (isAlreadyLogged)
             {
                 _logger.LogWarning("Duplicate progress submission detected for session {SessionId}.", request.SessionId);
-                return RequestResult<LogWorkoutProgressResponseDto>.Failure(ErrorCode.WorkoutSessionAlreadyCompleted, "Workout session already completed and progress logged.");
+                return RequestResult<LogWorkoutProgressResponseDto>.Failure(ErrorCode.ProgressAlreadyLogged, "Workout session already completed and progress logged.");
             }
 
             try
@@ -89,12 +91,13 @@ namespace ProgressService.Features.Progress.Commands.LogWorkoutProgress
 
                     stats.Accumulate(request.DurationInMinutes, request.CaloriesBurned);
 
+                    // Publish Event
+                    var endPoint = await _sendEndpoint.GetSendEndpoint(new Uri($"queue:{QueueNames.WorkoutProgressLogged}"));
+                    var message = new WorkoutProgressLoggedMessage(request.SessionId);
+                    await endPoint.Send(message);
+
                     return new LogWorkoutProgressResponseDto(workoutLog.Id, streakUpdated, streak.CurrentStreak);
                 }, ct);
-
-                // Publish Event
-                var endPoint = await _sendEndpoint.GetSendEndpoint(new Uri("queue:WorkoutProgress-Logged"));
-                await endPoint.Send("WorkoutProgressLogged");
 
                 return RequestResult<LogWorkoutProgressResponseDto>.Success(responseDto);
             }

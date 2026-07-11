@@ -15,20 +15,10 @@ namespace WorkoutService.Infrastructure.Data.Configurations
             .IsRequired()
             .HasMaxLength(150);
 
-            builder.HasIndex(e => e.Name)
-                   .IsUnique(); // To prevent repeating the same exercise name
-
             builder.Property(e => e.TargetMuscles)
                    .HasConversion(v => JsonSerializer
                    .Serialize(v, (JsonSerializerOptions?)null),v => JsonSerializer
                    .Deserialize<List<string>>(v, (JsonSerializerOptions?)null)!);
-                  
-
-            builder.HasIndex(e => e.Difficulty)
-                   .HasDatabaseName("IX_Exercises_Difficulty");
-
-            builder.HasIndex(e => e.Name)
-                   .HasDatabaseName("IX_Exercises_Name");
 
         }
     }

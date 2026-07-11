@@ -33,7 +33,7 @@
             var lastDate = LastWorkoutDate.Value.Date;
             var daysDifference = (localCompletionDate - lastDate).Days;
 
-            if (daysDifference == 1) // تمرن في اليوم التالي مباشرة (تتابع صحيح)
+            if (daysDifference == 1) // Exercise the very next day: proper sequence.
             {
                 CurrentStreak++;
                 if (CurrentStreak > LongestStreak)
@@ -43,14 +43,13 @@
                 LastWorkoutDate = localCompletionDate;
                 return true;
             }
-            else if (daysDifference > 1) // انقطعت السلسلة
+            else if (daysDifference > 1) // The chain broke
             {
                 CurrentStreak = 1;
                 LastWorkoutDate = localCompletionDate;
                 return true;
             }
 
-            // إذا تمرن في نفس اليوم مرة أخرى لا نغير الـ Counter
             return false;
         }
     }

@@ -1,4 +1,7 @@
-﻿namespace WorkoutService.Domain.Aggregates.WorkoutPlans
+﻿using WorkoutService.Common.Exceptions;
+using WorkoutService.Common.Responses;
+
+namespace WorkoutService.Domain.Aggregates.WorkoutPlans
 {
     public class WorkoutPlan
     {
@@ -37,10 +40,10 @@
         public Workout AddWorkout(string name, int duration, string difficulty, string category, int caloriesBurn, string imageUrl, bool isPremium, int dayNumber)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Workout name cannot be empty.");
+                throw new DomainException(ErrorCode.ValidationError);
 
             if (_workouts.Any(w => w.DayNumber == dayNumber))
-                throw new InvalidOperationException($"A workout routine for Day {dayNumber} already exists in this plan.");
+                throw new DomainException(ErrorCode.WorkoutAlreadyExists);
 
             Workout workout = new Workout(name, duration, difficulty, category, caloriesBurn, imageUrl, isPremium, dayNumber);
             _workouts.Add(workout);

@@ -1,9 +1,10 @@
 ﻿using MassTransit;
 using MediatR;
 using SharedMessages.Messages;
+using SharedMessages.Queues;
 using WorkoutService.Common.Responses;
 using WorkoutService.Domain.Aggregates.WorkoutSessions;
-using WorkoutService.Features.Workouts.Queries.GetWorkoutById;
+using WorkoutService.Features.Common.Queries.CheckWorkoutExists;
 using WorkoutService.Infrastructure.Data.Repositories;
 
 namespace WorkoutService.Features.Workouts.Commands.StartWorkout
@@ -21,22 +22,22 @@ namespace WorkoutService.Features.Workouts.Commands.StartWorkout
             _logger.LogInformation("Starting workout session for WorkoutId: {WorkoutId}, UserId: {UserId}", request.WorkoutId, request.UserId);
 
 
-            var workoutExists = await _mediator.Send(new GetWorkoutByIdQuery(request.WorkoutId), ct);
+            bool workoutExists = await _mediator.Send(new WorkoutExistsQuery(request.WorkoutId), ct);
 
-            if (!workoutExists.IsSuccess)
+            if (!workoutExists)
             {
                 _logger.LogWarning("Workout with Id {WorkoutId} was not found.", request.WorkoutId);
 
                 return RequestResult<Guid>.Failure(ErrorCode.WorkoutNotFound, $"Workout with ID '{request.WorkoutId}' does not exist.");
             }
 
-            var hasActiveSession = await _repository.AnyAsync(s => s.UserId == request.UserId && s.Status == WorkoutSessionStatus.Active, ct);
+            bool hasActiveSession = await _repository.AnyAsync(s => s.UserId == request.UserId && s.Status == WorkoutSessionStatus.Active, ct);
 
             if (hasActiveSession)
             {
                 _logger.LogWarning("User {UserId} already has an active workout session.", request.UserId);
 
-                return RequestResult<Guid>.Failure(ErrorCode.WorkoutAlreadyStarted, "You already have an active workout session.");
+                return RequestResult<Guid>.Failure(ErrorCode.WorkoutSessionAlreadyStarted, "You already have an active workout session.");
             }
 
             var sessionId = await _unitOfWork.ExecuteAsync(async () =>
@@ -48,7 +49,7 @@ namespace WorkoutService.Features.Workouts.Commands.StartWorkout
                 await _repository.AddAsync(session, ct);
 
                 // Publish Event
-                var endPoint = await _sendEndpoint.GetSendEndpoint(new Uri("queue:session-Started"));
+                var endPoint = await _sendEndpoint.GetSendEndpoint(new Uri($"queue:{QueueNames.SessionStarted}"));
                 await endPoint.Send(new SessionStartedMessage
                 {
                     SessionId = session.Id,
@@ -58,6 +59,7 @@ namespace WorkoutService.Features.Workouts.Commands.StartWorkout
                     Status = session.Status
                 });
 
+                _logger.LogInformation("Published SessionStarted event for SessionId {SessionId}", session.Id);
 
                 return session.Id;
             }, ct);

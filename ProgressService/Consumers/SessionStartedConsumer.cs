@@ -1,6 +1,7 @@
 ﻿using MassTransit;
 using ProgressService.Domian.References;
 using ProgressService.Infrastructure.Data.Repositories;
+using SharedMessages.Messages;
 
 namespace ProgressService.Consumers
 {

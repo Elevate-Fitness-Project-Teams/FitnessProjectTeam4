@@ -27,10 +27,6 @@ namespace ProgressService.Infrastructure.Data.Configurations
 
             builder.Property(s => s.LastWorkoutDate)
                 .IsRequired(false); //It can be Null if it's a new user
-
-            // Create a unique index to ensure that each user has only one streak record in the system.
-            builder.HasIndex(s => s.UserId)
-                   .IsUnique();
         }
     }
 }

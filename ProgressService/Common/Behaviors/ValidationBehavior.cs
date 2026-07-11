@@ -1,45 +1,56 @@
 ﻿using FluentValidation;
+using FluentValidation.Results;
 using MediatR;
 using ProgressService.Common.Responses;
 using System.Reflection;
 
 namespace ProgressService.Common.Behaviors
 {
-    public class ValidationBehavior<TRequest, TResponse>(IEnumerable<IValidator<TRequest>> validators)
-          : IPipelineBehavior<TRequest, TResponse>
-          where TRequest : IRequest<TResponse>
+    public class ValidationBehavior<TRequest, TResponse>(
+     IEnumerable<IValidator<TRequest>> validators)
+     : IPipelineBehavior<TRequest, TResponse>
+     where TRequest : IRequest<TResponse>
     {
-        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken ct)
+        public async Task<TResponse> Handle(TRequest request, RequestHandlerDelegate<TResponse> next, CancellationToken cancellationToken)
         {
-            if (!validators.Any()) return await next();
+            if (!validators.Any())
+                return await next();
 
             var context = new ValidationContext<TRequest>(request);
-            var results = await Task.WhenAll(validators.Select(v => v.ValidateAsync(context, ct)));
-            var failures = results.SelectMany(r => r.Errors).Where(f => f != null).ToList();
 
-            if (failures.Count != 0)
-            {
-                var errorMessage = failures.FirstOrDefault()?.ErrorMessage;
+            ValidationResult[] validationResults =
+                await Task.WhenAll(
+                    validators.Select(v => v.ValidateAsync(context, cancellationToken)));
 
-                var resultType = typeof(TResponse).GetGenericArguments()[0];
-                var genericResultType = typeof(RequestResult<>).MakeGenericType(resultType);
+            var errors = validationResults
+                .SelectMany(x => x.Errors)
+                .Where(x => x is not null)
+                .Select(x => x.ErrorMessage)
+                .Distinct()
+                .ToList();
 
-                var failureMethod = genericResultType.GetMethod("Failure",
-                    BindingFlags.Public | BindingFlags.Static,
-                    null,
-                    new[] { typeof(ErrorCode), typeof(string) },
-                    null);
+            if (!errors.Any())
+                return await next();
 
-                if (failureMethod != null)
-                {
-                    var result = failureMethod.Invoke(null, new object[] { ErrorCode.ValidationError, errorMessage! });
-                    return (TResponse)result!;
-                }
+            Type[] genericArguments = typeof(TResponse).GetGenericArguments();
 
-                throw new InvalidOperationException($"Architecture Error: 'Failure' method with message not found in {genericResultType.Name}");
-            }
+            if (genericArguments.Length != 1)
+                throw new InvalidOperationException($"{typeof(TResponse).Name} must be of type RequestResult<T>.");
 
-            return await next();
+            var resultType = genericArguments[0];
+
+            var requestResultType = typeof(RequestResult<>).MakeGenericType(resultType);
+
+            var validationFailureMethod = requestResultType.GetMethod(
+                nameof(RequestResult<object>.ValidationFailure),
+                BindingFlags.Public | BindingFlags.Static);
+
+            if (validationFailureMethod is null)
+                throw new InvalidOperationException($"ValidationFailure method was not found on {requestResultType.Name}.");
+
+            var response = validationFailureMethod.Invoke(null, new object[] { errors });
+
+            return (TResponse)response!;
         }
     }
 }

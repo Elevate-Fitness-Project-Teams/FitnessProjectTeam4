@@ -6,6 +6,8 @@ using ProgressService.Common.Behaviors;
 using ProgressService.Consumers;
 using ProgressService.Infrastructure.Data.Contexts;
 using ProgressService.Infrastructure.Data.Repositories;
+using Serilog;
+using SharedMessages.Queues;
 using System.Reflection;
 
 namespace ProgressService
@@ -45,6 +47,14 @@ namespace ProgressService
             builder.Services.AddMassTransit(x =>
             {
                 x.AddConsumer<SessionStartedConsumer>();
+
+                x.AddEntityFrameworkOutbox<ProgressDbContext>(opt =>
+                {
+                    opt.UseSqlServer();
+                    opt.UseBusOutbox();
+                    opt.QueryDelay = TimeSpan.FromSeconds(1); // Delay Before Querying Outbox Messages 
+                });
+
                 x.UsingRabbitMq((context, config) =>
                 {
                     config.Host("rabbitmq://localhost", h =>
@@ -53,12 +63,24 @@ namespace ProgressService
                         h.Password("quest");
                     });
 
-                    config.ReceiveEndpoint("session-Started", e =>
+                    config.ReceiveEndpoint(QueueNames.SessionStarted, e =>
                     {
                         e.ConfigureConsumer<SessionStartedConsumer>(context);
+                        e.UseEntityFrameworkOutbox<ProgressDbContext>(context);
                     });
                 });
             });
+
+            // Register Serilog
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(builder.Configuration)
+                .WriteTo.Console()
+                .WriteTo.Seq("http://localhost:5341")
+                .Enrich.WithEnvironmentName().Enrich.WithMachineName()
+                .CreateLogger();
+
+            // Use Serilog for Logging
+            builder.Host.UseSerilog();
 
             var app = builder.Build();
 
