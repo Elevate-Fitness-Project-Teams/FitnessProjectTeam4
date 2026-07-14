@@ -24,13 +24,13 @@ namespace WorkoutService.Features.Workouts
             var result = await _mediator.Send(new GetWorkoutsQuery(request.Category, request.Difficulty, request.SearchText, request.Page, request.PageSize), ct);
 
             if (!result.IsSuccess)
-                return new FailedResponseViewModel( result.Message ?? "Failed to fetch Data.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                return new FailedResponseViewModel( result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
 
             var data = _mapper.Map<List<WorkoutViewModel>>(result.Data!.Items);
 
             var paginatedList = new PaginatedList<WorkoutViewModel>(data, result.Data.TotalCount, result.Data.PageNumber, request.PageSize);
 
-            return new SuccessResponseViewModel<PaginatedList<WorkoutViewModel>>(paginatedList, "Workout fetched successfully.", new List<string>(), 200, DateTime.UtcNow);
+            return new SuccessResponseViewModel<PaginatedList<WorkoutViewModel>>(paginatedList, "Workout fetched successfully.", DateTime.UtcNow);
 
         }
 
@@ -40,10 +40,10 @@ namespace WorkoutService.Features.Workouts
             var result = await _mediator.Send(new GetWorkoutByIdQuery(id), ct);
 
             if (!result.IsSuccess)
-                return new FailedResponseViewModel( result.Message ?? "Failed to fetch Data.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
             var viewModel = _mapper.Map<WorkoutDetailsViewModel>(result.Data);
 
-                return new SuccessResponseViewModel<WorkoutDetailsViewModel>(viewModel, "Workout fetched successfully.", new List<string>(), 200, DateTime.UtcNow);
+                return new SuccessResponseViewModel<WorkoutDetailsViewModel>(viewModel, "Workout fetched successfully.", DateTime.UtcNow);
         }
 
         [HttpGet("by-plan/{planId}")]
@@ -52,10 +52,10 @@ namespace WorkoutService.Features.Workouts
             var result = await _mediator.Send(new GetWorkoutsByPlanQuery(planId), ct);
 
             if (!result.IsSuccess)
-                return new FailedResponseViewModel( result.Message ?? "Failed to fetch Data.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
             var viewModel = _mapper.Map<List<WorkoutViewModel>>(result.Data);
 
-                return new SuccessResponseViewModel<List<WorkoutViewModel>>(viewModel, "Workout fetched successfully.", new List<string>(), 200, DateTime.UtcNow);
+                return new SuccessResponseViewModel<List<WorkoutViewModel>>(viewModel, "Workout fetched successfully.", DateTime.UtcNow);
         }
 
         [HttpGet("category/{categoryName}")]
@@ -64,10 +64,10 @@ namespace WorkoutService.Features.Workouts
             var result = await _mediator.Send(new GetWorkoutsByCategoryQuery(categoryName), ct);
 
             if (!result.IsSuccess)
-                return new FailedResponseViewModel( result.Message ?? "Failed to fetch Data.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
             var viewModel = _mapper.Map<List<WorkoutViewModel>>(result.Data);
 
-                return new SuccessResponseViewModel<List<WorkoutViewModel>>(viewModel, "Workout fetched successfully.", new List<string>(), 200, DateTime.UtcNow);
+                return new SuccessResponseViewModel<List<WorkoutViewModel>>(viewModel, "Workout fetched successfully.", DateTime.UtcNow);
         }
 
         [HttpPost]
@@ -86,23 +86,23 @@ namespace WorkoutService.Features.Workouts
                 request.DayNumber), ct);
 
             if (!result.IsSuccess)
-                return new FailedResponseViewModel(result.Message ?? "Failed to Create Workout.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
 
-            return new SuccessResponseViewModel<Guid>(result.Data, "Workout Created successfully.", new List<string>(), 201, DateTime.UtcNow);
+            return new SuccessResponseViewModel<Guid>(result.Data, "Workout Created successfully.", DateTime.UtcNow);
 
         }
 
         [HttpPost("{id}/start")]
-        public async Task<ResponseViewModel> StartWorkout([FromRoute] Guid id, CancellationToken ct)
+        public async Task<ResponseViewModel> StartWorkoutSession([FromRoute] Guid id, CancellationToken ct)
         {
             var userId = Guid.NewGuid(); // Test
 
-            var result = await _mediator.Send(new StartWorkoutCommand(id, userId), ct);
+            var result = await _mediator.Send(new StartWorkoutSessionOrchestrator(id, userId), ct);
 
             if (!result.IsSuccess)
-                return new FailedResponseViewModel(result.Message ?? "Failed to Start Session.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
 
-            return new SuccessResponseViewModel<Guid>(result.Data, "Workout session started successfully.", new List<string>(), 201, DateTime.UtcNow);
+            return new SuccessResponseViewModel<Guid>(result.Data, "Workout session started successfully.", DateTime.UtcNow);
         }
 
     }

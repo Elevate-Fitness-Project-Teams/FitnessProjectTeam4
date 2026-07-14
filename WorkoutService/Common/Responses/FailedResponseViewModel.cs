@@ -1,17 +1,23 @@
 ﻿
 
+using WorkoutService.Common.Extensions;
+
 namespace WorkoutService.Common.Responses
 {
     public class FailedResponseViewModel : ResponseViewModel
     {
-        public ErrorCode ErrorCode { get; set; }
+        public ErrorCode ErrorCode { get; init; }
 
-        public FailedResponseViewModel( string message, List<string> errors, ErrorCode errorCode, DateTime timestamp) 
+        public FailedResponseViewModel( ErrorCode errorCode, DateTime timestamp, string? message = null, List<string>? errors = null)
         {
             IsSuccess = false;
-            Message = message;
+
             ErrorCode = errorCode;
+
+            Message = message ?? errorCode.GetDescription();
+
             Errors = errors;
+
             Timestamp = timestamp;
         }
     }

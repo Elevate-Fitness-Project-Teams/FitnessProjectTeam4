@@ -19,13 +19,13 @@ namespace WorkoutService.Features.Exercises
             var result = await _mediator.Send(new GetPaginatedExercisesQuery(request.BodyPart, request.Equipment, request.SearchText, request.Page, request.PageSize), ct);
 
             if (!result.IsSuccess)
-                return new FailedResponseViewModel(result.Message ?? "Failed to fetch Data.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
 
             var mappedItems = _mapper.Map<List<ExerciseCardViewModel>>(result.Data!.Items);
 
             var pagedViewModel = new PaginatedList<ExerciseCardViewModel>(mappedItems, result.Data.TotalCount, result.Data.PageNumber, request.PageSize);
 
-            return new SuccessResponseViewModel<PaginatedList<ExerciseCardViewModel>>(pagedViewModel, "Exercises fetched successfully.", new List<string>(), 200, DateTime.UtcNow);
+            return new SuccessResponseViewModel<PaginatedList<ExerciseCardViewModel>>(pagedViewModel, "Exercises fetched successfully.",        DateTime.UtcNow);
 
         }
 
@@ -35,11 +35,11 @@ namespace WorkoutService.Features.Exercises
             var result = await _mediator.Send(new GetExerciseByIdQuery(id), ct);
 
             if (!result.IsSuccess)
-                return new FailedResponseViewModel(result.Message ?? "Failed to fetch Data.", new List<string>(), result.ErrorCode, DateTime.UtcNow);
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
 
             var viewModel = _mapper.Map<ExerciseDetailsViewModel>(result.Data);
 
-            return new SuccessResponseViewModel<ExerciseDetailsViewModel>(viewModel, "Exercise fetched successfully.", new List<string>(), 200, DateTime.UtcNow);
+            return new SuccessResponseViewModel<ExerciseDetailsViewModel>(viewModel, "Exercise fetched successfully.", DateTime.UtcNow);
         }
     }
 }

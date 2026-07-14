@@ -4,5 +4,5 @@ using NutritionService.Features.Meals.DTOs;
 
 namespace NutritionService.Features.Meals.Queries.GetMealDetail
 {
-    public record GetMealDetailQuery(Guid MealId) : IRequest<ApiResponse<MealDetailDto>>;
+    public record GetMealDetailQuery(Guid MealId) : IRequest<Result<MealDetailDto>>;
 }

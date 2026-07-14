@@ -7,8 +7,8 @@ using NutritionService.Persistence.Repositories;
 
 namespace NutritionService.Features.MealPlans.Queries.GetMealPlansByCalories
 {
-    public class GetMealPlansByCaloriesHandler 
-        : IRequestHandler<GetMealPlansByCaloriesQuery, ApiResponse<List<MealPlanByCaloriesDto>>>
+    public class GetMealPlansByCaloriesHandler
+        : IRequestHandler<GetMealPlansByCaloriesQuery, Result<PagedResult<MealPlanByCaloriesDto>>>
     {
         private readonly IRepository<MealPlan> _mealPlanRepository;
 
@@ -17,37 +17,40 @@ namespace NutritionService.Features.MealPlans.Queries.GetMealPlansByCalories
             _mealPlanRepository = mealPlanRepository;
         }
 
-        public async Task<ApiResponse<List<MealPlanByCaloriesDto>>> Handle(
-            GetMealPlansByCaloriesQuery request, 
+        public async Task<Result<PagedResult<MealPlanByCaloriesDto>>> Handle(
+            GetMealPlansByCaloriesQuery request,
             CancellationToken cancellationToken)
         {
-            var mealPlans = await _mealPlanRepository.Query()
-                .Where(mp => mp.TargetCalorieRangeMin <= request.Calories 
-                          && mp.TargetCalorieRangeMax >= request.Calories)
+           
+            if (request.Calories is null)
+            {
+                return Result<PagedResult<MealPlanByCaloriesDto>>.Failure(
+                    NutritionErrors.RequiredField,
+                    statusCode: 400);
+            }
+
+           
+            var query = _mealPlanRepository.Query()
+                .Where(mp => mp.TargetCalorieRangeMin <= request.Calories &&
+                             mp.TargetCalorieRangeMax >= request.Calories)
+                .OrderByDescending(mp => mp.CreatedAt) 
                 .Select(mp => new MealPlanByCaloriesDto
                 {
                     MealPlanId = mp.MealPlanId,
                     Name = mp.Name,
                     Description = mp.Description,
                     TargetCalorieRangeMin = mp.TargetCalorieRangeMin,
-                    TargetCalorieRangeMax = mp.TargetCalorieRangeMax,
-                    Items = mp.MealPlanItems.Select(mpi => new MealPlanItemDto
-                    {
-                        Id = mpi.Id,
-                        MealId = mpi.MealId,
-                        MealName = mpi.Meal.Name,
-                        DayOfWeek = mpi.DayOfWeek.ToString(),
-                        MealTime = mpi.MealTime.ToString()
-                    }).ToList()
-                })
-                .ToListAsync(cancellationToken);
+                    TargetCalorieRangeMax = mp.TargetCalorieRangeMax
+                });
 
-            if (mealPlans.Count == 0)
-            {
-                return ApiResponse<List<MealPlanByCaloriesDto>>.Fail("RES_NO_PLAN_MATCHES_CALORIES", 404);
-            }
+           
+            var pagedResult = await query.ToPagedResultAsync(
+                request.PageIndex,
+                request.PageSize,
+                cancellationToken);
 
-            return ApiResponse<List<MealPlanByCaloriesDto>>.Success(mealPlans);
+          
+            return Result<PagedResult<MealPlanByCaloriesDto>>.Success(pagedResult);
         }
     }
 }

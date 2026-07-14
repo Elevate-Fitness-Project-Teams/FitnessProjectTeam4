@@ -1,4 +1,7 @@
-﻿namespace WorkoutService.Domain.Aggregates.WorkoutSessions
+﻿using WorkoutService.Common.Exceptions;
+using WorkoutService.Common.Responses;
+
+namespace WorkoutService.Domain.Aggregates.WorkoutSessions
 {
     public class WorkoutSession
     {
@@ -11,6 +14,11 @@
 
         private WorkoutSession() { }
 
+        // For creating a stub/disconnected entity for partial updates
+        public WorkoutSession(Guid id)
+        {
+            Id = id;
+        }
         private WorkoutSession(Guid userId, Guid workoutId)
         {
             Id = Guid.NewGuid();
@@ -28,7 +36,7 @@
         public void CompleteSession()
         {
             if (Status != WorkoutSessionStatus.Active)
-                throw new InvalidOperationException("Only active sessions can be completed.");
+                throw new DomainException(ErrorCode.WorkoutSessionNotActive);
 
             EndTime = DateTime.UtcNow;
             Status = WorkoutSessionStatus.Completed;

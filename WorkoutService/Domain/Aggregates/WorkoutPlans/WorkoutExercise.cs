@@ -1,4 +1,5 @@
-﻿
+﻿using WorkoutService.Common.Exceptions;
+using WorkoutService.Common.Responses;
 using WorkoutService.Domain.References;
 
 namespace WorkoutService.Domain.Aggregates.WorkoutPlans
@@ -18,8 +19,8 @@ namespace WorkoutService.Domain.Aggregates.WorkoutPlans
 
         internal WorkoutExercise(Guid workoutId, Guid exerciseId, int orderIndex, int sets, string reps, int restTimeInSeconds)
         {
-            if (sets <= 0) throw new ArgumentException("Sets must be greater than zero.");
-            if (restTimeInSeconds < 0) throw new ArgumentException("Rest time cannot be negative.");
+            if (sets <= 0) throw new DomainException(ErrorCode.InvalidExerciseSets);
+            if (restTimeInSeconds < 0) throw new DomainException(ErrorCode.InvalidExerciseRestTime);
 
             WorkoutId = workoutId;
             ExerciseId = exerciseId;

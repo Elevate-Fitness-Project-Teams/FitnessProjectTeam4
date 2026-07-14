@@ -7,7 +7,7 @@ using NutritionService.Persistence.Repositories;
 
 namespace NutritionService.Features.Meals.Queries.GetMealDetail
 {
-    public class GetMealDetailHandler : IRequestHandler<GetMealDetailQuery, ApiResponse<MealDetailDto>>
+    public class GetMealDetailHandler : IRequestHandler<GetMealDetailQuery, Result<MealDetailDto>>
     {
         private readonly IRepository<Meal> _mealRepository;
 
@@ -15,8 +15,7 @@ namespace NutritionService.Features.Meals.Queries.GetMealDetail
         {
             _mealRepository = mealRepository;
         }
-
-        public async Task<ApiResponse<MealDetailDto>> Handle(GetMealDetailQuery request, CancellationToken cancellationToken)
+        public async Task<Result<MealDetailDto>> Handle(GetMealDetailQuery request, CancellationToken cancellationToken)
         {
             var meal = await _mealRepository.Query()
                 .Where(m => m.MealId == request.MealId)
@@ -41,12 +40,14 @@ namespace NutritionService.Features.Meals.Queries.GetMealDetail
                 })
                 .FirstOrDefaultAsync(cancellationToken);
 
+           
             if (meal == null)
             {
-                return ApiResponse<MealDetailDto>.Fail("RES_MEAL_NOT_FOUND", 404);
+                return Result<MealDetailDto>.Failure(NutritionErrors.MealNotFound, 404);
             }
 
-            return ApiResponse<MealDetailDto>.Success(meal);
+            
+            return Result<MealDetailDto>.Success(meal);
         }
     }
 }
