@@ -1,4 +1,6 @@
 <Solution>
+  <Project Path="NutritionService/NutritionService.csproj" />
+  <Project Path="NutritionSharedMessages/NutritionSharedMessages.csproj" />
   <Project Path="ProgressService/ProgressService.csproj" Id="6a9b9b89-5a22-4c46-bf54-43a3bb4289d9" />
   <Project Path="SharedMessages/SharedMessages.csproj" />
   <Project Path="WorkoutService/WorkoutService.csproj" />

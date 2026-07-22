@@ -10,25 +10,22 @@ namespace NutritionService.Features.Recommendations
     {
         public void MapEndpoints(IEndpointRouteBuilder app)
         {
-            
+           
             app.MapGet("/api/v1/nutrition/recommendations", async (
                 [FromQuery] string? mealType,
                 [FromQuery] int? maxCalories,
                 [FromQuery] float? minProtein,
                 [FromQuery] int? page,
                 [FromQuery] int? pageSize,
-                IMediator mediator) =>
+                IMediator mediator,
+                CancellationToken cancellationToken) =>
             {
-                
-                var userId = Guid.Parse("11111111-1111-1111-1111-111111111111");
-
                 var query = new GetRecommendationsQuery(
-                    userId, mealType, maxCalories, minProtein,
-                    page ?? 1, pageSize ?? 10);
+                    mealType, page ?? 1, pageSize ?? 10, maxCalories, minProtein);
 
-                var result = await mediator.Send(query);
+                var result = await mediator.Send(query, cancellationToken);
                 return Results.Json(result, statusCode: result.StatusCode);
-            });
+            }).RequireAuthorization();
 
             
             app.MapGet("/api/v1/nutrition/recommendations/{userId}", async (
@@ -38,15 +35,16 @@ namespace NutritionService.Features.Recommendations
                 [FromQuery] float? minProtein,
                 [FromQuery] int? page,
                 [FromQuery] int? pageSize,
-                IMediator mediator) =>
+                IMediator mediator,
+                CancellationToken cancellationToken) =>
             {
                 var query = new GetRecommendationsByUserIdQuery(
                     userId, mealType, maxCalories, minProtein,
                     page ?? 1, pageSize ?? 10);
 
-                var result = await mediator.Send(query);
+                var result = await mediator.Send(query, cancellationToken);
                 return Results.Json(result, statusCode: result.StatusCode);
-            });
+            }).RequireAuthorization();
         }
     }
 }
