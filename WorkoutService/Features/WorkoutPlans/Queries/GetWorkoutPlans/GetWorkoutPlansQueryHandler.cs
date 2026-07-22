@@ -19,8 +19,8 @@ namespace WorkoutService.Features.WorkoutPlans.Queries.GetWorkoutPlans
         {
             var query = _repository.GetAll();
 
-            if (!string.IsNullOrWhiteSpace(request.Goal))
-                query = query.Where(wp => wp.Goal == request.Goal);
+            if (!string.IsNullOrWhiteSpace(request.UserTier))
+                query = query.Where(wp => wp.UserTier == request.UserTier);
 
             var totalCount = await query.CountAsync(ct);
 

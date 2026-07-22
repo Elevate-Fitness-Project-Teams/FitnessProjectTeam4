@@ -12,8 +12,6 @@ namespace ProgressService.Consumers
     {
         public async Task Consume(ConsumeContext<SessionStartedMessage> context)
         {
-            await _unitOfWork.ExecuteAsync(async () =>
-            {
                var command = context.Message;
                var refernces = new WorkoutSessionReference()
                {
@@ -25,9 +23,7 @@ namespace ProgressService.Consumers
                };
 
                await _repository.AddAsync(refernces, context.CancellationToken);
-
-               return true;
-            }, context.CancellationToken);
+                await _unitOfWork.SaveChangesAsync(context.CancellationToken);
 
         }
     }

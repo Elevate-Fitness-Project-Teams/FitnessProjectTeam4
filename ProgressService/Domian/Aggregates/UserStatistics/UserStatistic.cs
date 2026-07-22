@@ -14,6 +14,7 @@ namespace ProgressService.Domian.Aggregates.UserStatistics
         public double StartWeight { get; private set; }
         public double TotalWeightLost { get; private set; }
         public DateTime UpdatedAt { get; private set; }
+        public byte[] RowVersion { get; private set; }
 
         private UserStatistic() { }
 
@@ -50,6 +51,9 @@ namespace ProgressService.Domian.Aggregates.UserStatistics
         {
             if (newWeight < 40 || newWeight > 200)
                 throw new DomainException(ErrorCode.InvalidWeightValue);
+             
+            if (StartWeight <= 0)
+                StartWeight = newWeight;
 
             CurrentWeight = newWeight;
             TotalWeightLost = StartWeight - CurrentWeight;

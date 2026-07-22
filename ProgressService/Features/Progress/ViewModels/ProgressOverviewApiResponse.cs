@@ -1,5 +1,15 @@
 ﻿namespace ProgressService.Features.Progress.ViewModels
 {
-    public record ProgressOverviewApiResponse(Guid LogId, string UserId, DateTime CompletedAt, int DurationInMinutes, string Difficulty);
+    public class ProgressOverviewApiResponse
+    {
+        public Guid LogId { get; init; }
 
+        public string UserId { get; init; } = null!;
+
+        public DateTime CompletedAt { get; init; }
+
+        public int DurationInMinutes { get; init; }
+
+        public string Difficulty { get; init; } = null!;
+    }
 }

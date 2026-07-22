@@ -8,7 +8,8 @@ namespace WorkoutService.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<WorkoutPlan> builder)
         {
-            builder.HasKey(wp => wp.Id);
+            builder.Property(wp => wp.Id)
+                   .ValueGeneratedNever();
 
             builder.Property(wp => wp.Title)
                    .IsRequired()

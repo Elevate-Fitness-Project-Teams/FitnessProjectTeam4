@@ -24,11 +24,12 @@ namespace WorkoutService.Domain.Aggregates.WorkoutPlans
 
         private WorkoutPlan() { }
 
-        public WorkoutPlan(string title, string description, Guid userId, string userTier, string externalPlanId, string difficulty, string status)
+        public WorkoutPlan(string title, string description,string goal, Guid userId, string userTier, string externalPlanId, string difficulty, string status)
         {
             Id = Guid.NewGuid();
             Title = title;
             Description = description;
+            Goal = goal;
             UserId = userId;
             ExternalPlanId = externalPlanId;
             Difficulty = difficulty;
@@ -45,7 +46,7 @@ namespace WorkoutService.Domain.Aggregates.WorkoutPlans
             if (_workouts.Any(w => w.DayNumber == dayNumber))
                 throw new DomainException(ErrorCode.WorkoutAlreadyExists);
 
-            Workout workout = new Workout(name, duration, difficulty, category, caloriesBurn, imageUrl, isPremium, dayNumber);
+            Workout workout = new Workout(Id ,name, duration, difficulty, category, caloriesBurn, imageUrl, isPremium, dayNumber);
             _workouts.Add(workout);
             return workout;
         }

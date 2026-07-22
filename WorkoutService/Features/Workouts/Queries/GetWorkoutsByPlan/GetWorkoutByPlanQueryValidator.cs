@@ -2,9 +2,9 @@
 
 namespace WorkoutService.Features.Workouts.Queries.GetWorkoutsByPlan
 {
-    public class GetWorkoutsByPlanQueryValidator : AbstractValidator<GetWorkoutsByPlanQuery>
+    public class GetWorkoutByPlanQueryValidator : AbstractValidator<GetWorkoutByPlanQuery>
     {
-        public GetWorkoutsByPlanQueryValidator()
+        public GetWorkoutByPlanQueryValidator()
         {
             RuleFor(x => x.PlanId)
               .NotEmpty()

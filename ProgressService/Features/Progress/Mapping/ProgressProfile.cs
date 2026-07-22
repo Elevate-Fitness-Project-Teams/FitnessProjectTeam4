@@ -2,7 +2,6 @@
 using ProgressService.Domian.Aggregates.UserStatistics;
 using ProgressService.Domian.Aggregates.WeightHistories;
 using ProgressService.Domian.Aggregates.WorkoutLogs;
-using ProgressService.Features.Progress.Commands.LogWorkoutProgress;
 using ProgressService.Features.Progress.Dtos;
 using ProgressService.Features.Progress.ViewModels;
 
@@ -12,19 +11,13 @@ namespace ProgressService.Features.Progress.Mapping
     {
         public ProgressProfile()
         {
-            CreateMap<LogProgressApiRequest, LogWorkoutProgressOrchestrator>()
-                .ForMember(dest => dest.UserId, opt => opt.Ignore());
-
-            CreateMap<ExerciseCompletedApiItem, ExerciseCompletedDto>();
-
             CreateMap<LogWorkoutProgressResponseDto, LogProgressApiResponse>();
 
             CreateMap<LogWeightResponseDto, LogWeightApiResponse>();
 
             CreateMap<WeightHistory, WeightHistoryDto>();
 
-            CreateMap<UserStatistic, UserStatsDto>()
-                .ForMember(dest => dest.TotalWorkouts, opt => opt.MapFrom(src => src.TotalWorkoutsCompleted));
+            CreateMap<UserStatistic, UserStatsDto>();
 
             CreateMap<WeightHistoryDto, WeightHistoryApiResponse>();
 

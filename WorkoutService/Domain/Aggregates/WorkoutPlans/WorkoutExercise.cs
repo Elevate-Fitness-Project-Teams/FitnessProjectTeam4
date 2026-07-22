@@ -6,6 +6,7 @@ namespace WorkoutService.Domain.Aggregates.WorkoutPlans
 {
     public class WorkoutExercise
     {
+        public Guid Id { get; private set; }
         public Guid WorkoutId { get; private set; } // Composite FK 1
         public Guid ExerciseId { get; private set; } // Composite FK 2
 
@@ -13,7 +14,6 @@ namespace WorkoutService.Domain.Aggregates.WorkoutPlans
         public int SetsDefault { get; private set; }
         public string RepsDefault { get; private set; } = null!;
         public int RestTimeInSeconds { get; private set; }
-        public Exercise Exercise { get; private set; } = null!;
 
         private WorkoutExercise() { }
 

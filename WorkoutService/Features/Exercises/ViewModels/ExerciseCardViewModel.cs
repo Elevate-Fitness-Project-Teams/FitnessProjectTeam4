@@ -3,9 +3,10 @@
     public record ExerciseCardViewModel(
         Guid Id,
         string Name,
-        string BodyPart,
-        string Equipment,
-        string TargetMusclesJson, 
-        string ThumbnailUrl,
-        string Difficulty);
+        string Description,
+        string EquipmentNeeded,
+        List<string> TargetMuscles,
+        string VideoUrl,
+        string Difficulty
+    );
 }

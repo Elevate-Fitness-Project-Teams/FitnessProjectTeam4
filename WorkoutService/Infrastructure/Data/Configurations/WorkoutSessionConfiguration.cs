@@ -15,6 +15,10 @@ namespace WorkoutService.Infrastructure.Data.Configurations
             .IsRequired()
             .HasMaxLength(50);
 
+            builder.HasIndex(x => x.UserId)
+               .IsUnique()
+               .HasFilter("[Status] = 'Active'");
+
             builder.HasOne<Workout>()
                    .WithMany()
                    .HasForeignKey(ws => ws.WorkoutId)

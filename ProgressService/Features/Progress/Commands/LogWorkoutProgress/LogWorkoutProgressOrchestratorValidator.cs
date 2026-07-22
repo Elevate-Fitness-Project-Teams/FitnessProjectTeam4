@@ -13,8 +13,7 @@ namespace ProgressService.Features.Progress.Commands.LogWorkoutProgress
                 .NotEmpty();
 
             RuleFor(x => x.UserId)
-                .NotEmpty()
-                .MaximumLength(450);
+                .NotEmpty();
 
             RuleFor(x => x.CompletedAt)
                 .NotEmpty();

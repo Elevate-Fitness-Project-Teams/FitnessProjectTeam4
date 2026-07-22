@@ -10,7 +10,7 @@ namespace ProgressService.Infrastructure.Data.Repositories
         public async Task<T> ExecuteAsync<T>(Func<Task<T>> action, CancellationToken cancellationToken)
         {
             if (_transaction == null)
-                _transaction = await _context.Database.BeginTransactionAsync();
+                _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
 
             _depth++;
             T result;
@@ -39,6 +39,11 @@ namespace ProgressService.Infrastructure.Data.Repositories
                 _depth--;
             }
             return result;
+        }
+
+        public Task SaveChangesAsync(CancellationToken cancellationToken)
+        {
+            return _context.SaveChangesAsync(cancellationToken);
         }
     }
 }

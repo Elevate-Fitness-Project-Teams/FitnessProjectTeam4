@@ -18,30 +18,34 @@ namespace WorkoutService.Features.Workouts.Commands.CreateWorkout
 
             try
             {
-                var newWorkoutId = await _unitOfWork.ExecuteAsync<Guid>(async () =>
+                return await _unitOfWork.ExecuteAsync(async () =>
                 {
-                    var workoutPlan = await _repository.GetAll()
+                    _logger.LogDebug("Retrieving workout plan {PlanId} with workouts", request.WorkoutPlanId);
+
+                    var workoutPlan = await _repository.GetAll().AsTracking()
                         .Include(p => p.Workouts)
                         .FirstOrDefaultAsync(p => p.Id == request.WorkoutPlanId, ct);
 
                     if (workoutPlan == null)
-                        throw new KeyNotFoundException($"Workout Plan with ID '{request.WorkoutPlanId}' does not exist.");
+                    {
+                        _logger.LogWarning("Workout plan with ID {PlanId} not found", request.WorkoutPlanId);
+                        return RequestResult<Guid>.Failure(ErrorCode.WorkoutPlanNotFound, $"Workout plan with ID {request.WorkoutPlanId} not found.");
+                    }
 
                     var workout = workoutPlan.AddWorkout(
-                         request.Name,
-                         request.DurationInMinutes,
-                         request.Difficulty,
-                         request.Category,
-                         request.CaloriesBurn,
-                         request.ImageUrl,
-                         request.IsPremium,
-                         request.DayNumber);
+                     request.Name,
+                     request.DurationInMinutes,
+                     request.Difficulty,
+                     request.Category,
+                     request.CaloriesBurn,
+                     request.ImageUrl,
+                     request.IsPremium,
+                     request.DayNumber);
 
+                    _logger.LogInformation("Workout {WorkoutId} added to workout plan {PlanId}", workout.Id, request.WorkoutPlanId);
+                    return RequestResult<Guid>.Success(workout.Id);
 
-                    return workout.Id;
                 }, ct);
-
-                return RequestResult<Guid>.Success(newWorkoutId);
 
             }
             catch (KeyNotFoundException ex)

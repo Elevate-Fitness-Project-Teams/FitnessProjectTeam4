@@ -45,6 +45,12 @@ namespace ProgressService.Infrastructure.Data.Configurations
             builder.Property(u => u.UpdatedAt)
                    .IsRequired();
 
+            builder.HasIndex(x => x.UserId)
+                   .IsUnique();
+
+            builder.Property(x => x.RowVersion)
+                   .IsRowVersion();
+
         }
     }
 }

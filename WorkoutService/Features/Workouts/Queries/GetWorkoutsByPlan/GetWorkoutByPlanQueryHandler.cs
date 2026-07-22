@@ -12,9 +12,9 @@ namespace WorkoutService.Features.Workouts.Queries.GetWorkoutsByPlan
     public class GetWorkoutByPlanQueryHandler(
         IGenericRepository<Workout> _repository,
         IMapper _mapper) : 
-        IRequestHandler<GetWorkoutsByPlanQuery, RequestResult<List<WorkoutDto>>>
+        IRequestHandler<GetWorkoutByPlanQuery, RequestResult<List<WorkoutDto>>>
     {
-        public async Task<RequestResult<List<WorkoutDto>>> Handle(GetWorkoutsByPlanQuery request, CancellationToken cancellationToken)
+        public async Task<RequestResult<List<WorkoutDto>>> Handle(GetWorkoutByPlanQuery request, CancellationToken cancellationToken)
         {
             var workouts = await _repository.GetAll()
                .Where(w => w.WorkoutPlanId == request.PlanId)
