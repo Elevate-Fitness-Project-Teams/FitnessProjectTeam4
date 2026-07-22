@@ -9,7 +9,7 @@ namespace WorkoutService.Infrastructure.Data.Configurations
     {
         public void Configure(EntityTypeBuilder<WorkoutExercise> builder)
         {
-            builder.HasKey(we => new { we.WorkoutId, we.ExerciseId });
+            builder.HasKey(x => x.Id);
 
             builder.Property(we => we.RepsDefault)
                    .HasMaxLength(50)

@@ -21,11 +21,27 @@ namespace ProgressService.Features.Progress
         public async Task<ResponseViewModel> LogProgress([FromBody] LogProgressApiRequest request, CancellationToken ct)
         {
 
-            var userId = "user_user_123";
+            Guid userId = Guid.Parse("56b58013-715f-4f4d-9fa7-6c5f0b0db996"); // Test
 
-            var command = _mapper.Map<LogWorkoutProgressOrchestrator>(request);
-
-            command = command with { UserId = userId };
+            var command = new LogWorkoutProgressOrchestrator(
+                  request.WorkoutId,
+                  request.SessionId,
+                  userId,
+                  request.CompletedAt,
+                  request.Duration,
+                  request.CaloriesBurned,
+                  request.Difficulty,
+                  request.Notes,
+                  request.Rating,
+                  request.ExercisesCompleted
+                      .Select(x => new ExerciseCompletedDto(
+                          x.ExerciseId,
+                          x.SetsCompleted,
+                          x.RepsCompleted,
+                          x.WeightUsed,
+                          x.Completed))
+                      .ToList()
+            );
 
             var result = await _mediator.Send(command, ct);
 
@@ -39,7 +55,7 @@ namespace ProgressService.Features.Progress
         [HttpPost("weight")]
         public async Task<ResponseViewModel> LogWeight([FromBody] LogWeightApiRequest request, CancellationToken ct)
         {
-            var currentUserId = "user_user_123";
+            var currentUserId = "25d02245-0cf1-4cb3-8cc2-60beec58a193";
 
             var result = await _mediator.Send(new LogWeightCommand(currentUserId, request.Weight, request.Date, request.Notes), ct);
 
@@ -58,8 +74,8 @@ namespace ProgressService.Features.Progress
             if (!result.IsSuccess)
                 return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
 
-            var viewModel = _mapper.Map<WeightHistoryApiResponse>(result.Data);
-            return new SuccessResponseViewModel<WeightHistoryApiResponse>(viewModel);
+            var viewModel = _mapper.Map<List<WeightHistoryApiResponse>>(result.Data);
+            return new SuccessResponseViewModel<List<WeightHistoryApiResponse>>(viewModel);
         }
 
         [HttpGet("stats/{userId}")]

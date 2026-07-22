@@ -18,7 +18,7 @@ namespace WorkoutService.Features.WorkoutPlans
         [HttpPost]
         public async Task<ResponseViewModel> CreatePlan([FromBody] CreateWorkoutPlanRequest request, CancellationToken ct = default)
         {
-            var command = new CreateWorkoutPlanCommand(request.Title, request.Description, request.Status, request.UserTier, request.Goal, request.ExternalPlanId, request.UserId, request.UserTier);
+            var command = new CreateWorkoutPlanCommand(request.Title, request.Description, request.Status, request.Difficulty, request.Goal, request.ExternalPlanId, request.UserId, request.UserTier);
             var result = await _mediator.Send(command, ct);
 
             if (!result.IsSuccess)

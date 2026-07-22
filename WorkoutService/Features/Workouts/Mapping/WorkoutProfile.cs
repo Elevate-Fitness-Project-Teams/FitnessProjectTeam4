@@ -10,10 +10,9 @@ namespace WorkoutService.Features.Workouts.Mapping
         public WorkoutProfile()
         {
             CreateMap<Workout, WorkoutDto>();
-            CreateMap<Workout, WorkoutViewModel>();
+            CreateMap<WorkoutDto, WorkoutViewModel>();
 
-            CreateMap<WorkoutExercise, WorkoutExerciseDto>()
-            .ForMember(dest => dest.ExerciseName, opt => opt.MapFrom(src => src.Exercise.Name));
+            CreateMap<WorkoutExercise, WorkoutExerciseDto>();
 
             CreateMap<Workout, WorkoutDetailsDto>();
             CreateMap<WorkoutDetailsDto, WorkoutDetailsViewModel>();

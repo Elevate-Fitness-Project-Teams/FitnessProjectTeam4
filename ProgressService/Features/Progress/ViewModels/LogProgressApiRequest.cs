@@ -17,7 +17,7 @@ namespace ProgressService.Features.Progress.ViewModels
          Guid ExerciseId,
          int SetsCompleted,
          int RepsCompleted,
-         double WeightUsed,
+         decimal WeightUsed,
          bool Completed
     );
 }

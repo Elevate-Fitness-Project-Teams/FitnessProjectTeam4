@@ -10,6 +10,9 @@ namespace WorkoutService.Infrastructure.Data.Configurations
         {
             builder.HasKey(w => w.Id);
 
+            builder.Property(w => w.Id)
+                   .ValueGeneratedNever();
+
             builder.Property(w => w.Name)
                .IsRequired()
                .HasMaxLength(150);

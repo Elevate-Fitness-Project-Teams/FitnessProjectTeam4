@@ -18,9 +18,10 @@
 
         private Workout() { }
 
-        public Workout(string name, int durationInMinutes, string difficulty, string category, int caloriesBurn, string imageUrl, bool isPremium, int dayNumber)
+        internal Workout(Guid workoutPlanId, string name, int durationInMinutes, string difficulty, string category, int caloriesBurn, string imageUrl, bool isPremium, int dayNumber)
         {
             Id = Guid.NewGuid();
+            WorkoutPlanId = workoutPlanId;
             Name = name;
             DurationInMinutes = durationInMinutes;
             Difficulty = difficulty;
@@ -35,7 +36,7 @@
         {
             int nextOrderIndex = _workoutExercises.Count + 1; 
 
-            var workoutExercise = new WorkoutExercise(this.Id, exerciseId, nextOrderIndex, sets, reps, restTimeInSeconds);
+            var workoutExercise = new WorkoutExercise(Id, exerciseId, nextOrderIndex, sets, reps, restTimeInSeconds);
             _workoutExercises.Add(workoutExercise);
         }
     }

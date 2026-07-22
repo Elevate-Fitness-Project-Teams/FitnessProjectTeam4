@@ -1,4 +1,3 @@
-using AutoMapper;
 using FluentValidation;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
@@ -38,7 +37,7 @@ namespace ProgressService
             builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
             // Add AutoMapper
-            builder.Services.AddAutoMapper(typeof(Program).Assembly);
+            builder.Services.AddAutoMapper(cfg => { }, typeof(Program).Assembly);
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -52,7 +51,7 @@ namespace ProgressService
                 {
                     opt.UseSqlServer();
                     opt.UseBusOutbox();
-                    opt.QueryDelay = TimeSpan.FromSeconds(1); // Delay Before Querying Outbox Messages 
+                    opt.QueryDelay = TimeSpan.FromSeconds(10); // Delay Before Querying Outbox Messages 
                 });
 
                 x.UsingRabbitMq((context, config) =>

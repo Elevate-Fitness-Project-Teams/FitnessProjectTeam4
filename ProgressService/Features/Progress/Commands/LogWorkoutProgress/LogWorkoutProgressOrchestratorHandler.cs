@@ -9,6 +9,7 @@ using ProgressService.Features.Progress.Commands.CreateUserStreak;
 using ProgressService.Features.Progress.Common.Queries.CheckSessionAlreadyLogged;
 using ProgressService.Features.Progress.Common.Queries.GetStreakByUserId;
 using ProgressService.Features.Progress.Common.Queries.GetUserStatistics;
+using ProgressService.Features.Progress.Common.Queries.IsWorkoutSessionExists;
 using ProgressService.Features.Progress.Dtos;
 using ProgressService.Infrastructure.Data.Repositories;
 using SharedMessages.Messages;
@@ -27,7 +28,7 @@ namespace ProgressService.Features.Progress.Commands.LogWorkoutProgress
         public async Task<RequestResult<LogWorkoutProgressResponseDto>> Handle(LogWorkoutProgressOrchestrator request, CancellationToken ct)
         {
 
-            bool sessionExists = await _mediator.Send(new CheckSessionAlreadyLoggedQuery(request.SessionId), ct);
+            bool sessionExists = await _mediator.Send(new IsWorkoutSessionExistsQuery(request.SessionId, request.UserId), ct);
 
             if (!sessionExists)
             {
@@ -48,57 +49,59 @@ namespace ProgressService.Features.Progress.Commands.LogWorkoutProgress
 
             try
             {
-                var responseDto = await _unitOfWork.ExecuteAsync(async () =>
+                var workoutLog = new WorkoutLog(
+                           Guid.NewGuid(),
+                           request.WorkoutId,
+                           request.SessionId,
+                           request.UserId.ToString(),
+                           request.CompletedAt,
+                           request.DurationInMinutes,
+                           request.CaloriesBurned,
+                           request.Difficulty,
+                           request.Notes,
+                           request.Rating
+                );
+
+                foreach (var item in request.ExercisesCompleted)
                 {
-                    var workoutLog = new WorkoutLog(
-                        Guid.NewGuid(),
-                        request.WorkoutId,
-                        request.SessionId,
-                        request.UserId,
-                        request.CompletedAt,
-                        request.DurationInMinutes,
-                        request.CaloriesBurned,
-                        request.Difficulty,
-                        request.Notes,
-                        request.Rating
-                    );
+                    workoutLog.AddCompletedExercise(item.ExerciseId, item.SetsCompleted, item.RepsCompleted, item.WeightUsed, item.Completed);
+                }
 
-                    foreach (var item in request.ExercisesCompleted)
-                    {
-                        workoutLog.AddCompletedExercise(item.ExerciseId, item.SetsCompleted, item.RepsCompleted, item.WeightUsed, item.Completed);
-                    }
+                await _repository.AddAsync(workoutLog, ct);
 
-                    await _repository.AddAsync(workoutLog, ct);
+                var streak = await _mediator.Send(new GetUserStreakQuery(request.UserId.ToString()), ct);
 
-                    var streak = await _mediator.Send(new GetUserStreakQuery(request.UserId), ct);
+                if (streak == null)
+                {
+                    streak = new UserStreak(Guid.NewGuid(), request.UserId.ToString());
+                    await _mediator.Send(new CreateUserStreakCommand(streak), ct);
+                }
 
-                    if (streak == null)
-                    {
-                        streak = new UserStreak(Guid.NewGuid(), request.UserId);
-                        await _mediator.Send(new CreateUserStreakCommand(streak), ct);
-                    }
-
-                    bool streakUpdated = streak.UpdateStreak(request.CompletedAt);
+                bool streakUpdated = streak.UpdateStreak(request.CompletedAt);
 
 
-                    var stats = await _mediator.Send(new GetUserStatisticsQuery(request.UserId), ct);
+                var stats = await _mediator.Send(new GetUserStatisticsQuery(request.UserId.ToString()), ct);
 
-                    if (stats == null)
-                    {
-                        stats = new UserStatistic(Guid.NewGuid(), request.UserId);
-                        await _mediator.Send(new CreateUserStatisticCommand(stats), ct);
-                    }
+                if (stats == null)
+                {
+                    stats = new UserStatistic(Guid.NewGuid(), request.UserId.ToString());
+                    await _mediator.Send(new CreateUserStatisticCommand(stats), ct);
+                }
 
-                    stats.Accumulate(request.DurationInMinutes, request.CaloriesBurned);
+                stats.Accumulate(request.DurationInMinutes, request.CaloriesBurned);
 
-                    // Publish Event
-                    var endPoint = await _sendEndpoint.GetSendEndpoint(new Uri($"queue:{QueueNames.WorkoutProgressLogged}"));
-                    var message = new WorkoutProgressLoggedMessage(request.SessionId);
-                    await endPoint.Send(message);
+                // Publish Event
+                var endPoint = await _sendEndpoint.GetSendEndpoint(new Uri($"queue:{QueueNames.WorkoutProgressLogged}"));
+                var message = new WorkoutProgressLoggedMessage(request.SessionId);
+                await endPoint.Send(message);
+                _logger.LogInformation("Workout progress event queued in Outbox for session {SessionId}", request.SessionId);
+               
+                await _unitOfWork.SaveChangesAsync(ct);
+                _logger.LogInformation("Workout progress persisted successfully for session {SessionId}", request.SessionId);
 
-                    return new LogWorkoutProgressResponseDto(workoutLog.Id, streakUpdated, streak.CurrentStreak);
-                }, ct);
+                var responseDto = new LogWorkoutProgressResponseDto(workoutLog.Id, streakUpdated, streak.CurrentStreak);
 
+                _logger.LogInformation("Workout progress logging completed successfully. WorkoutLogId: {WorkoutLogId}", workoutLog.Id);
                 return RequestResult<LogWorkoutProgressResponseDto>.Success(responseDto);
             }
             catch (ArgumentOutOfRangeException ex)
@@ -111,6 +114,9 @@ namespace ProgressService.Features.Progress.Commands.LogWorkoutProgress
                 _logger.LogError(ex, "Fatal system error during progress record collation context for user {UserId}", request.UserId);
                 return RequestResult<LogWorkoutProgressResponseDto>.Failure(ErrorCode.InternalServerError, "An infrastructure ledger writing error occurred.");
             }
+
+
+
         }
     }
 }

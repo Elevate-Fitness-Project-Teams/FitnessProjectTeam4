@@ -1,11 +1,12 @@
 ﻿namespace ProgressService.Features.Progress.ViewModels
 {
-    public record UserStatsApiResponse(
-        int TotalWorkouts,
-        int TotalCaloriesBurned,
-        double CurrentWeight,
-        double StartWeight,
-        double TotalWeightLost,
-        DateTime UpdatedAt
-    );
+    public class UserStatsApiResponse
+    {
+        public int TotalWorkoutsCompleted { get; init; }
+        public int TotalCaloriesBurned { get; init; }
+        public int TotalMinutesTrained { get; init; }
+        public double CurrentWeight { get; init; }
+        public double StartWeight { get; init; }
+        public double TotalWeightLost { get; init; }
+    }
 }

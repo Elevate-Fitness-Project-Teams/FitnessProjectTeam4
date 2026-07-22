@@ -21,21 +21,15 @@ namespace WorkoutService.Features.Workouts.Commands.CompleteWorkoutSession
 
             try
             {
-                return await _unitOfWork.ExecuteAsync(async () =>
-                {
-                    // Fake Object Creation for Partial Update
-                    var newsession = new WorkoutSession(request.SessionId);
+                WorkoutSession newsession = await _repository.GetByIdAsTrackingAsync(request.SessionId, cancellationToken);
 
-                    newsession.CompleteSession(); 
+                newsession.CompleteSession();
 
-                    var propToUpdate =new [] { nameof(WorkoutSession.Status), nameof(WorkoutSession.EndTime)};
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
 
-                    _repository.SaveInclude(newsession, propToUpdate);
+                _logger.LogInformation("Successfully completed database partial update for session {SessionId}", request.SessionId);
 
-                    _logger.LogInformation("Successfully completed database partial update for session {SessionId}", request.SessionId);
-
-                    return RequestResult<Unit>.Success(Unit.Value);
-                }, cancellationToken);
+                return RequestResult<Unit>.Success(Unit.Value);
             }
             catch (InvalidOperationException ex)
             {

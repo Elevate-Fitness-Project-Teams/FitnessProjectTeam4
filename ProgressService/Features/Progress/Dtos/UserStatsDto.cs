@@ -1,11 +1,12 @@
 ﻿namespace ProgressService.Features.Progress.Dtos
 {
-    public record UserStatsDto(
-        int TotalWorkouts,
-        int TotalCaloriesBurned,
-        double CurrentWeight,
-        double StartWeight,
-        double TotalWeightLost,
-        DateTime UpdatedAt
-    );
+    public class UserStatsDto
+    {
+        public int TotalWorkoutsCompleted { get; init; }
+        public int TotalCaloriesBurned { get; init; }
+        public int TotalMinutesTrained { get; init; }
+        public double CurrentWeight { get; init; }
+        public double StartWeight { get; init; }
+        public double TotalWeightLost { get; init; }
+    }
 }

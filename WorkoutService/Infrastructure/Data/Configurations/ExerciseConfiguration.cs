@@ -19,7 +19,6 @@ namespace WorkoutService.Infrastructure.Data.Configurations
                    .HasConversion(v => JsonSerializer
                    .Serialize(v, (JsonSerializerOptions?)null),v => JsonSerializer
                    .Deserialize<List<string>>(v, (JsonSerializerOptions?)null)!);
-
         }
     }
 }

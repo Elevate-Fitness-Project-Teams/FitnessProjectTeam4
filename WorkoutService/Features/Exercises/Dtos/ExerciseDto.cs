@@ -3,9 +3,10 @@
     public record ExerciseDto(
         Guid Id,
         string Name,
-        string BodyPart,
-        string Equipment,
-        string TargetMuscles, 
-        string ThumbnailUrl,
-        string Difficulty);
+        string Description,
+        string EquipmentNeeded,
+        List<string> TargetMuscles, 
+        string VideoUrl,
+        string Difficulty
+    );
 }

@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using WorkoutService.Common.Behaviors;
 using WorkoutService.Common.Responses;
+using WorkoutService.Features.Exercises.Commands.CreateExercise;
 using WorkoutService.Features.Exercises.Queries.GetExerciseById;
 using WorkoutService.Features.Exercises.Queries.GetPaginatedExercises;
 using WorkoutService.Features.Exercises.ViewModels;
@@ -40,6 +41,16 @@ namespace WorkoutService.Features.Exercises
             var viewModel = _mapper.Map<ExerciseDetailsViewModel>(result.Data);
 
             return new SuccessResponseViewModel<ExerciseDetailsViewModel>(viewModel, "Exercise fetched successfully.", DateTime.UtcNow);
+        }
+        [HttpPost]
+        public async Task<ResponseViewModel> Create([FromBody] CreateExerciseApiRequest request, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new CreateExerciseCommand(request.Name, request.TargetMuscles, request.EquipmentNeeded, request.Description, request.VideoUrl, request.Difficulty), ct);
+
+            if (!result.IsSuccess)
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
+
+            return new SuccessResponseViewModel<Guid>(result.Data, "Exercise Created successfully.", DateTime.UtcNow);
         }
     }
 }

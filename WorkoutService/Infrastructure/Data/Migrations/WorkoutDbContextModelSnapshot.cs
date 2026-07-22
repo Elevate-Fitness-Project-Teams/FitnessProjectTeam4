@@ -195,7 +195,6 @@ namespace WorkoutService.Infrastructure.Data.Migrations
             modelBuilder.Entity("WorkoutService.Domain.Aggregates.WorkoutPlans.Workout", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("CaloriesBurn")
@@ -242,13 +241,11 @@ namespace WorkoutService.Infrastructure.Data.Migrations
 
             modelBuilder.Entity("WorkoutService.Domain.Aggregates.WorkoutPlans.WorkoutExercise", b =>
                 {
-                    b.Property<Guid>("WorkoutId")
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ExerciseId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("ExerciseId1")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("OrderIndex")
@@ -265,11 +262,14 @@ namespace WorkoutService.Infrastructure.Data.Migrations
                     b.Property<int>("SetsDefault")
                         .HasColumnType("int");
 
-                    b.HasKey("WorkoutId", "ExerciseId");
+                    b.Property<Guid>("WorkoutId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
 
                     b.HasIndex("ExerciseId");
 
-                    b.HasIndex("ExerciseId1");
+                    b.HasIndex("WorkoutId");
 
                     b.ToTable("WorkoutExercises");
                 });
@@ -277,7 +277,6 @@ namespace WorkoutService.Infrastructure.Data.Migrations
             modelBuilder.Entity("WorkoutService.Domain.Aggregates.WorkoutPlans.WorkoutPlan", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("CreatedAt")
@@ -353,6 +352,10 @@ namespace WorkoutService.Infrastructure.Data.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[Status] = 'Active'");
+
                     b.HasIndex("WorkoutId");
 
                     b.ToTable("WorkoutSessions");
@@ -423,19 +426,11 @@ namespace WorkoutService.Infrastructure.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("WorkoutService.Domain.References.Exercise", "Exercise")
-                        .WithMany()
-                        .HasForeignKey("ExerciseId1")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("WorkoutService.Domain.Aggregates.WorkoutPlans.Workout", null)
                         .WithMany("WorkoutExercises")
                         .HasForeignKey("WorkoutId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Exercise");
                 });
 
             modelBuilder.Entity("WorkoutService.Domain.Aggregates.WorkoutSessions.WorkoutSession", b =>

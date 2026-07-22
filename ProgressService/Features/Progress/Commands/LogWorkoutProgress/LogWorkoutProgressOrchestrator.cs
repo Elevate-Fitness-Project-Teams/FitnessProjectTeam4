@@ -7,7 +7,7 @@ namespace ProgressService.Features.Progress.Commands.LogWorkoutProgress
     public record LogWorkoutProgressOrchestrator(
         Guid WorkoutId,
         Guid SessionId,
-        string UserId,
+        Guid UserId,
         DateTime CompletedAt,
         int DurationInMinutes,
         int CaloriesBurned,

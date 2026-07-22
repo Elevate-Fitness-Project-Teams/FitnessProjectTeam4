@@ -40,5 +40,9 @@ namespace WorkoutService.Infrastructure.Data.Repositories
             }
             return result;
         }
+        public Task SaveChangesAsync(CancellationToken cancellationToken)
+        {
+            return _context.SaveChangesAsync(cancellationToken);
+        }
     }
 }

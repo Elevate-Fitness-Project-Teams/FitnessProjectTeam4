@@ -202,6 +202,12 @@ namespace ProgressService.Infrastructure.Data.Migrations
                         .HasColumnType("decimal(5,2)")
                         .HasDefaultValue(0m);
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<decimal>("StartWeight")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("decimal(5,2)")
@@ -236,6 +242,9 @@ namespace ProgressService.Infrastructure.Data.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
 
                     b.ToTable("UserStatistics");
                 });

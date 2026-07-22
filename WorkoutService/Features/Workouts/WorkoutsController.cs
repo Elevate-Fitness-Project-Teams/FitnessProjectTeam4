@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using WorkoutService.Common.Behaviors;
 using WorkoutService.Common.Responses;
+using WorkoutService.Features.Workouts.Commands.AddExerciseToWorkout;
 using WorkoutService.Features.Workouts.Commands.CreateWorkout;
 using WorkoutService.Features.Workouts.Commands.StartWorkout;
 using WorkoutService.Features.Workouts.Queries.GetWorkoutById;
@@ -49,7 +50,7 @@ namespace WorkoutService.Features.Workouts
         [HttpGet("by-plan/{planId}")]
         public async Task<ResponseViewModel> GetByPlanId([FromRoute] Guid planId, CancellationToken ct)
         {
-            var result = await _mediator.Send(new GetWorkoutsByPlanQuery(planId), ct);
+            var result = await _mediator.Send(new GetWorkoutByPlanQuery(planId), ct);
 
             if (!result.IsSuccess)
                 return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
@@ -90,6 +91,22 @@ namespace WorkoutService.Features.Workouts
 
             return new SuccessResponseViewModel<Guid>(result.Data, "Workout Created successfully.", DateTime.UtcNow);
 
+        }
+
+        [HttpPost("AddExerciseToWorkout")]
+        public async Task<ResponseViewModel> AddExerciseToWorkout([FromBody] AddExerciseToWorkoutApiRequest request, CancellationToken ct)
+        {
+            var result = await _mediator.Send(new AddExerciseToWorkoutCommand(
+                request.WorkoutId,
+                request.ExerciseId,
+                request.Sets,
+                request.Reps,
+                request.RestTimeInSeconds), ct);
+
+            if (!result.IsSuccess)
+                return new FailedResponseViewModel(result.ErrorCode, DateTime.UtcNow, result.Message, result.Errors?.ToList());
+
+            return new SuccessResponseViewModel<Unit>(Unit.Value, "Exercise Added To Workout Successfully.", DateTime.UtcNow);
         }
 
         [HttpPost("{id}/start")]

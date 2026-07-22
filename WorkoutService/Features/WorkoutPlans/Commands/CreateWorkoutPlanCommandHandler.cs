@@ -18,7 +18,7 @@ namespace WorkoutService.Features.WorkoutPlans.Commands
             {
                 var planId = await _unitOfWork.ExecuteAsync(async () =>
                 {
-                    var workoutPlan = new WorkoutPlan(request.Title, request.Description, request.UserId, request.UserTier, request.ExternalPlanId, request.Difficulty, request.Status);
+                    var workoutPlan = new WorkoutPlan(request.Title, request.Description, request.Goal, request.UserId, request.UserTier, request.ExternalPlanId, request.Difficulty, request.Status);
                     await _repository.AddAsync(workoutPlan, ct);
                     return workoutPlan.Id;
                 }, ct);

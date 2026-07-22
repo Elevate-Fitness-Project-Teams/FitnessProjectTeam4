@@ -1,4 +1,13 @@
 ﻿namespace ProgressService.Features.Progress.ViewModels
 {
-    public record WeightHistoryApiResponse(Guid Id, double Weight, DateTime Date, string? Notes);
+    public class WeightHistoryApiResponse
+    {
+        public Guid Id { get; init; }
+
+        public double Weight { get; init; }
+
+        public DateTime Date { get; init; }
+
+        public string? Notes { get; init; }
+    }
 }

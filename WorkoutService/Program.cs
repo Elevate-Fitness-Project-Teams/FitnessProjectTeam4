@@ -34,7 +34,7 @@ namespace WorkoutService
             });
 
             // Register AutoMapper
-            builder.Services.AddAutoMapper(typeof(Program).Assembly);
+            builder.Services.AddAutoMapper(cfg => { },typeof(Program).Assembly);
 
             builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
             builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -63,7 +63,6 @@ namespace WorkoutService
                     {
                         e.ConfigureConsumer<SessionCompletedConsumer>(context);
                         e.UseEntityFrameworkOutbox<WorkoutDbContext>(context);
-
                     });
                 });
             });
